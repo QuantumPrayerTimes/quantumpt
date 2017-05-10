@@ -1,0 +1,30 @@
+# IntelliJ project files
+.idea
+
+# Folders
+build/
+*release*/
+setup/
+*pycache*
+logs/
+wip/
+tests/
+scripts/
+
+# Files
+*.ini
+*.pyd
+*.spec
+*.qm
+*.pro
+
+# Libraries
+*.so
+*.dll
+*.a
+*.o
+
+# Binaries
+.exe
+.out
+
