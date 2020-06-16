@@ -22,6 +22,7 @@ from PyQt5.QtGui import QPixmap
 
 from prayertimes.core.common import translate
 from prayertimes.core.common.logapi import log
+from prayertimes.core.common.settings import Settings
 
 from prayertimes.ui.abstract import ControlOption
 
@@ -32,12 +33,12 @@ class ControlVolume(ControlOption):
                                             icon=":/icons/controloption_volume.png",
                                             parent=parent)
 
-        self.sld.setValue(100)
-        self.sld.valueChanged.connect(self._vol_control)
-
         self.vol_info = QtWidgets.QLabel("{} %".format(self.sld.value()))
         self.vol_info.setAlignment(Qt.AlignVCenter | Qt.AlignCenter)
         self.vol_info.setFixedWidth(40)
+
+        self.sld.valueChanged.connect(self._vol_control)
+        self.sld.setValue(Settings().value('general_settings/volume'))
 
         self.layout.addWidget(self.vol_info)
 
@@ -58,6 +59,7 @@ class ControlVolume(ControlOption):
         self.vol_info.setText("{} %".format(self.sld.value()))
         # Control athan, dua, player test and dua controller sound
         self.media_manager.set_volume(self.sld.value())
+        Settings().setValue('general_settings/volume', self.sld.value())
 
 
 class ControlOpacity(ControlOption):
