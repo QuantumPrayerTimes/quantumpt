@@ -56,6 +56,7 @@ class Settings(QSettings):
         'general_settings/close': 0,
         'general_settings/splashscreen': 1,
         'general_settings/language': 'en_US',
+        'general_settings/volume': 100,
     }
 
     current_config = {}
