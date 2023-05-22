@@ -1,5 +1,5 @@
 APScheduler==3.6.3
 geoip2==3.0.0
 pytz==2020.1
-requests==2.23.0
+requests==2.31.0
 PyQt5==5.15.0
