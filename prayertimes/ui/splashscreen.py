@@ -18,9 +18,9 @@
 
 import time
 
-from PyQt5 import QtWidgets
-from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtGui import QPixmap
+from PyQt6 import QtWidgets
+from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtGui import QPixmap
 
 
 class SplashScreen(QtWidgets.QSplashScreen):
@@ -34,13 +34,13 @@ class SplashScreen(QtWidgets.QSplashScreen):
     def __init__(self, parent=None):
         super(SplashScreen, self).__init__(parent)
 
-        self.setWindowModality(Qt.ApplicationModal)
+        self.setWindowModality(Qt.WindowModality.ApplicationModal)
 
-        self.setAttribute(Qt.WA_TranslucentBackground)
-        self.setAttribute(Qt.WA_DeleteOnClose)
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
 
         self.setObjectName(self.__class__.__name__)
-        self.setContextMenuPolicy(Qt.PreventContextMenu)
+        self.setContextMenuPolicy(Qt.ContextMenuPolicy.PreventContextMenu)
 
         pixmap = QPixmap(":/images/splashscreen.png")
         self.setPixmap(pixmap)

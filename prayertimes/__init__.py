@@ -22,9 +22,18 @@ import sys
 import time
 import traceback
 
-from PyQt5 import QtWidgets
-from PyQt5.QtCore import Qt, QSharedMemory, pyqtSignal, QCoreApplication, QFile, QTextStream
-from PyQt5.QtGui import QIcon, QFontDatabase
+from PyQt6 import QtWidgets
+from PyQt6.QtCore import (
+    Qt,
+    QSharedMemory,
+    pyqtSignal,
+    QCoreApplication,
+    QFile,
+    QTextStream,
+    QIODevice,
+    QResource,
+)
+from PyQt6.QtGui import QIcon, QFontDatabase
 
 from prayertimes.core.common.logapi import log
 from prayertimes.core.common.registry import Registry
@@ -40,7 +49,7 @@ from prayertimes.ui.splashscreen import SplashScreen
 from prayertimes.ui.wizard.firsttimewizard import QuantumPTWizard
 
 # Initialise the resources
-from prayertimes import resources
+QResource.registerResource(ResourcesLocation().resources_dir + "resources.rcc")
 
 
 class QuantumPT(QtWidgets.QApplication):
@@ -49,11 +58,13 @@ class QuantumPT(QtWidgets.QApplication):
     class in order to provide the core of the application.
     """
 
-    welcome_message = 'This program is aimed to provide a local (without internet connection) way to calculate ' \
-                      'prayer times and reminders. \n\nIt has been developed from scratch and may contains ' \
-                      'bugs. \nDon\'t hesitate to send any report if you find a bug while using the program.'
+    welcome_message = (
+        "This program is aimed to provide a local (without internet connection) way to calculate "
+        "prayer times and reminders. \n\nIt has been developed from scratch and may contains "
+        "bugs. \nDon't hesitate to send any report if you find a bug while using the program."
+    )
 
-    welcome_title = 'Welcome to Quantum Prayer Times (QuantumPT)'
+    welcome_title = "Welcome to Quantum Prayer Times (QuantumPT)"
 
     modify_style = pyqtSignal()
 
@@ -66,7 +77,7 @@ class QuantumPT(QtWidgets.QApplication):
         self.modify_style.connect(self.change_style)
 
         # Initialize language manager
-        LanguageManager(language='en_US')
+        LanguageManager(language="en_US")
 
         # Add predefined fonts
         QFontDatabase.addApplicationFont(":/fonts/besmellah.ttf")
@@ -75,7 +86,7 @@ class QuantumPT(QtWidgets.QApplication):
 
         # Set stylesheet as Qt resource
         stylesheet = QFile(":/styles/default.css")
-        stylesheet.open(QFile.ReadOnly | QFile.Text)
+        stylesheet.open(QIODevice.OpenModeFlag.ReadOnly | QIODevice.OpenModeFlag.Text)
 
         self.stylesheet = QTextStream(stylesheet).readAll()
         self.setStyleSheet(self.stylesheet)
@@ -86,11 +97,10 @@ class QuantumPT(QtWidgets.QApplication):
         self.setApplicationDisplayName("QuantumPrayerTimes")
         self.setApplicationName("QuantumPrayerTimes")
 
-        self.setOrganizationName('QuantumPrayerTimes')
-        self.setOrganizationDomain('quantumprayertimes.github.io')
+        self.setOrganizationName("QuantumPrayerTimes")
+        self.setOrganizationDomain("quantumprayertimes.github.io")
 
-        self.setEffectEnabled(Qt.UI_AnimateCombo, False)
-        self.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
+        self.setEffectEnabled(Qt.UIEffect.UI_AnimateCombo, False)
 
         Registry().register_signal("change_style", self.modify_style)
 
@@ -108,11 +118,11 @@ class QuantumPT(QtWidgets.QApplication):
         #     self.setStyleSheet(open("resources/styles/default.css").read())
         #     self.style = 0
 
-    def exec_(self):
+    def exec(self):
         """
         Override exec method to allow the shared memory to be released on exit
         """
-        result = QtWidgets.QApplication.exec_()
+        result = QtWidgets.QApplication.exec()
         # This function seems to cause problem in Ubuntu Linux because shared memory is not released.
         self.shared_memory.detach()
         return result
@@ -124,11 +134,11 @@ class QuantumPT(QtWidgets.QApplication):
         activate_first_notification = False
 
         # First time checks in settings
-        has_run_wizard = Settings().value('general_settings/wizard_runned')
+        has_run_wizard = Settings().value("general_settings/wizard_runned")
         if not has_run_wizard:
             first_wizard = QuantumPTWizard(parent=None)
-            if first_wizard.exec_() == QtWidgets.QDialog.Accepted:
-                Settings().setValue('general_settings/wizard_runned', 1)
+            if first_wizard.exec() == QtWidgets.QDialog.DialogCode.Accepted:
+                Settings().setValue("general_settings/wizard_runned", 1)
                 # Create the first notification only after wizard has been completed
                 activate_first_notification = True
             elif first_wizard.was_cancelled:
@@ -136,7 +146,7 @@ class QuantumPT(QtWidgets.QApplication):
                 sys.exit()
 
         # Show the SplashScreen
-        show_splash = Settings().value('general_settings/splashscreen')
+        show_splash = Settings().value("general_settings/splashscreen")
         if show_splash:
             splash = SplashScreen()
             splash.start_splashscreen.emit()
@@ -149,22 +159,36 @@ class QuantumPT(QtWidgets.QApplication):
         self.global_frame.repaint()
         self.processEvents()
 
-        Registry().execute('__application_init__')
-        Registry().execute('__application_post_init__')
+        Registry().execute("__application_init__")
+        Registry().execute("__application_post_init__")
 
         self.processEvents()
 
         self.global_frame.show()
 
+        # Center global frame
+        self.global_frame.setGeometry(
+            QtWidgets.QStyle.alignedRect(
+                Qt.LayoutDirection.LeftToRight,
+                Qt.AlignmentFlag.AlignCenter,
+                self.global_frame.size(),
+                self.primaryScreen().availableGeometry(),
+            )
+        )
+
         # Show first notification program
         if activate_first_notification:
-            WelcomeNotification(self.global_frame).notify(WelcomeNotification.OK, self.welcome_message,
-                                                          self.welcome_title, button_text='Bismillah / بسم الله')
+            WelcomeNotification(self.global_frame).notify(
+                WelcomeNotification.OK,
+                self.welcome_message,
+                self.welcome_title,
+                button_text="Bismillah / بسم الله",
+            )
 
         if show_splash:
             # now kill the splashscreen
             splash.finish(self.global_frame)
-            log.debug('Splashscreen closed')
+            log.debug("Splashscreen closed")
 
         # For debug
         # WelcomeNotification(self.global_frame).notify(WelcomeNotification.ERROR, self.welcome_message,
@@ -175,13 +199,13 @@ class QuantumPT(QtWidgets.QApplication):
         # if update_check:
         #     process
 
-        return self.exec_()
+        return self.exec()
 
     def is_already_running(self):
         """
         Look to see if QuantumPT is already running and ask if a 2nd instance is to be started.
         """
-        self.shared_memory = QSharedMemory('QuantumPT')
+        self.shared_memory = QSharedMemory("QuantumPT")
         if self.shared_memory.attach():
             log.error("It's already running")
             return True
@@ -223,7 +247,7 @@ def hook_exception(exc_type, exc_value, tracebackobj):
             instance.closeAllWindows()
         return
 
-    separator = '-' * 80
+    separator = "-" * 80
 
     log_crash_file = ResourcesLocation().logs_dir + "/crash.log"
     log_dir = os.path.dirname(os.path.realpath(log_crash_file))
@@ -232,23 +256,25 @@ def hook_exception(exc_type, exc_value, tracebackobj):
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
 
-    notice = \
-        """An unhandled exception occurred. Please report the problem\n""" \
-        """using the error reporting dialog or via email to {}.\n""" \
-        """A log has been written to "{}".\n\nError information:\n""".format("quantumprayertimes@gmail.com",
-                                                                             log_crash_file)
+    notice = (
+        """An unhandled exception occurred. Please report the problem\n"""
+        """using the error reporting dialog or via email to {}.\n"""
+        """A log has been written to "{}".\n\nError information:\n""".format(
+            "quantumprayertimes@gmail.com", log_crash_file
+        )
+    )
     time_string = time.strftime("%Y-%m-%d, %H:%M:%S")
 
     tbinfofile = io.StringIO()
     traceback.print_tb(tracebackobj, None, tbinfofile)
     tbinfofile.seek(0)
     tbinfo = tbinfofile.read()
-    errmsg = '%s: \n%s' % (str(exc_type), str(exc_value))
+    errmsg = "%s: \n%s" % (str(exc_type), str(exc_value))
 
     sections = [separator, time_string, separator, errmsg, separator, tbinfo]
-    msg = '\n'.join(sections)
+    msg = "\n".join(sections)
 
-    with open(log_crash_file, 'w') as f:
+    with open(log_crash_file, "w") as f:
         try:
             f.write(msg)
         except OSError:
@@ -256,7 +282,7 @@ def hook_exception(exc_type, exc_value, tracebackobj):
 
     error_box = CriticalExceptionDialog()
     error_box.text_edit.setText(str(notice) + str(msg))
-    if not error_box.exec_():
+    if not error_box.exec():
         Registry().execute("close_application")
         QtWidgets.QApplication.instance().quit()
 
@@ -267,21 +293,23 @@ def main():
     """
     # Add path to qt_plugins instead of having mediaservice, platforms and sqldrivers in main
     # directory, currently : plugins/mediaservice - plugins/platforms - plugins/sqldrivers
-    QtWidgets.QApplication.addLibraryPath(os.path.join(ResourcesLocation().root_dir, 'plugins'))
+    QtWidgets.QApplication.addLibraryPath(
+        os.path.join(ResourcesLocation().root_dir, "plugins")
+    )
 
     # Now create and actually run the application.
     quantum_app = QuantumPT(sys.argv)
 
-    log.info('Running program')
-    log.info('INI file: %s', Settings.file_path)
+    log.info("Running program")
+    log.info("INI file: %s", Settings.file_path)
 
-    Registry().register('application', quantum_app)
+    Registry().register("application", quantum_app)
     quantum_app.setApplicationVersion("v0.0.1")
     # Registry().execute("restore_default_settings")
+
+    sys.excepthook = hook_exception
 
     # Instance check
     if quantum_app.is_already_running():
         sys.exit()
-
-    sys.excepthook = hook_exception
     sys.exit(quantum_app.run())

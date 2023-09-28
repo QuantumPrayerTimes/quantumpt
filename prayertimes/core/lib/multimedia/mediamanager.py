@@ -20,7 +20,11 @@ from prayertimes.core.common.registry import Registry
 from prayertimes.core.common.registryproperties import RegistryProperties
 from prayertimes.core.common.registrymixin import UniqueRegistryMixin
 
-from prayertimes.core.lib.multimedia.mediacore import AthanPreviewPlayer, AthanMediaPlayer, RandomMediaPlayer
+from prayertimes.core.lib.multimedia.mediacore import (
+    AthanPreviewPlayer,
+    AthanMediaPlayer,
+    RandomMediaPlayer,
+)
 
 
 class MediaManager(UniqueRegistryMixin, RegistryProperties):
@@ -32,7 +36,7 @@ class MediaManager(UniqueRegistryMixin, RegistryProperties):
     """
 
     # Shourouq is not included because it is not an athan
-    __prayers_list__ = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha']
+    __prayers_list__ = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"]
 
     def __init__(self):
         super(MediaManager, self).__init__(None)
@@ -48,7 +52,9 @@ class MediaManager(UniqueRegistryMixin, RegistryProperties):
         Registry().register_function("pause_all_athans", self.pause_all_athans)
         Registry().register_function("resume_all_athans", self.resume_all_athans)
         Registry().register_function("stop_preview_athan", self.stop_preview_athan)
-        Registry().register_function("control_preview_athan", self.control_preview_athan)
+        Registry().register_function(
+            "control_preview_athan", self.control_preview_athan
+        )
         Registry().register_function("change_current_athan", self.change_athan)
 
     def __application_clean__(self):
@@ -151,12 +157,12 @@ class MediaManager(UniqueRegistryMixin, RegistryProperties):
         :param vol: new volume to set.
         :return:
         """
-        self.athan_player.setVolume(vol)
+        self.athan_player.setup_volume(vol)
         # dua_after_athan player is inside athan_player object
-        self.athan_player.dua_after_athan_player.setVolume(vol)
+        self.athan_player.dua_after_athan_player.setup_volume(vol)
 
-        self.dua_player.setVolume(vol)
-        self.athan_preview.setVolume(vol)
+        self.dua_player.setup_volume(vol)
+        self.athan_preview.setup_volume(vol)
 
     def mute(self):
         """

@@ -19,7 +19,7 @@
 # project : https://openlp.org                                                #
 # --------------------------------------------------------------------------- #
 
-from PyQt5.QtCore import QSettings
+from PyQt6.QtCore import QSettings
 
 from prayertimes.core.common.logapi import log
 from prayertimes.core.common.registry import Registry
@@ -33,41 +33,43 @@ class Settings(QSettings):
     """
 
     default_config = {
-        'city/continent': 'Europe',
-        'city/country': 'France',
-        'city/cc': 'FR',
-        'city/city': 'Paris',
-        'city/state': 'Ile-de-France',
-        'city/latitude': 49.25,
-        'city/longitude': 4.03,
-        'city/timezone': 'Europe/Paris',
-        'city/utc': 2,
-        'prayer_offsets/fajr': 0,
-        'prayer_offsets/shourouq': 0,
-        'prayer_offsets/dhuhr': 0,
-        'prayer_offsets/asr': 0,
-        'prayer_offsets/maghrib': 0,
-        'prayer_offsets/isha': 0,
-        'prayer_settings/asr_method': 'standard',
-        'prayer_settings/calculation': 'ISNA',
-        'prayer_settings/dua_after_athan': 1,
-        'general_settings/arabic_names': 0,
-        'general_settings/wizard_runned': 0,
-        'general_settings/close': 0,
-        'general_settings/splashscreen': 1,
-        'general_settings/language': 'en_US',
-        'general_settings/volume': 100,
+        "city/continent": "Europe",
+        "city/country": "France",
+        "city/cc": "FR",
+        "city/city": "Paris",
+        "city/state": "Ile-de-France",
+        "city/latitude": 49.25,
+        "city/longitude": 4.03,
+        "city/timezone": "Europe/Paris",
+        "city/utc": 2,
+        "prayer_offsets/fajr": 0,
+        "prayer_offsets/shourouq": 0,
+        "prayer_offsets/dhuhr": 0,
+        "prayer_offsets/asr": 0,
+        "prayer_offsets/maghrib": 0,
+        "prayer_offsets/isha": 0,
+        "prayer_settings/asr_method": "standard",
+        "prayer_settings/calculation": "ISNA",
+        "prayer_settings/dua_after_athan": 1,
+        "general_settings/arabic_names": 0,
+        "general_settings/wizard_runned": 0,
+        "general_settings/close": 0,
+        "general_settings/splashscreen": 1,
+        "general_settings/language": "en_US",
+        "general_settings/volume": 100,
     }
 
     current_config = {}
 
-    file_path = 'settings.ini'
+    file_path = "settings.ini"
 
     def __init__(self):
-        super(Settings, self).__init__(self.file_path, QSettings.IniFormat)
+        super(Settings, self).__init__(self.file_path, QSettings.Format.IniFormat)
         QSettings().setFallbacksEnabled(False)  # File only, no fallback to registry.
 
-        Registry().register_function("restore_default_settings", self.set_up_default_values)
+        Registry().register_function(
+            "restore_default_settings", self.set_up_default_values
+        )
 
     def save_city_config(self, city_dict):
         """
@@ -93,16 +95,17 @@ class Settings(QSettings):
 
         :return:
         """
-        city_dict = dict(city=self.value("city/city", type=str),
-                         continent=self.value("city/continent", type=str),
-                         country=self.value("city/country", type=str),
-                         cc=self.value("city/cc", type=str),
-                         state=self.value("city/state", type=str),
-                         lat=self.value("city/latitude", type=float),
-                         lng=self.value("city/longitude", type=float),
-                         tz=self.value("city/timezone", type=str),
-                         utc=self.value("city/utc", type=float)
-                         )
+        city_dict = dict(
+            city=self.value("city/city", type=str),
+            continent=self.value("city/continent", type=str),
+            country=self.value("city/country", type=str),
+            cc=self.value("city/cc", type=str),
+            state=self.value("city/state", type=str),
+            lat=self.value("city/latitude", type=float),
+            lng=self.value("city/longitude", type=float),
+            tz=self.value("city/timezone", type=str),
+            utc=self.value("city/utc", type=float),
+        )
 
         log.debug("loading city config: \n{}".format(city_dict))
         return city_dict
@@ -195,7 +198,7 @@ class Settings(QSettings):
         :return: the default value of the key given in parameter.
         """
         if self.group():
-            key = self.group() + '/' + key
+            key = self.group() + "/" + key
         return Settings.default_config[key]
 
     def value(self, key, **kwargs):
@@ -208,7 +211,7 @@ class Settings(QSettings):
         """
         # if group() is not empty the group has not been specified together with the key.
         if self.group():
-            default_value = Settings.default_config[self.group() + '/' + key]
+            default_value = Settings.default_config[self.group() + "/" + key]
         else:
             default_value = Settings.default_config[key]
         setting = super(Settings, self).value(key, default_value, **kwargs)
@@ -230,7 +233,7 @@ class Settings(QSettings):
             # An empty string saved to the settings results in a None type being returned.
             # Convert it to empty unicode string.
             if isinstance(default_value, str):
-                return ''
+                return ""
             # An empty list saved to the settings results in a None type being returned.
             else:
                 return []
@@ -239,7 +242,7 @@ class Settings(QSettings):
             if isinstance(setting, bool):
                 return setting
             # Sometimes setting is string instead of a boolean.
-            return setting == 'true'
+            return setting == "true"
         if isinstance(default_value, int):
             return int(setting)
         if isinstance(default_value, float):

@@ -16,7 +16,7 @@
 # more details.                                                               #
 # --------------------------------------------------------------------------- #
 
-from PyQt5 import QtWidgets
+from PyQt6 import QtWidgets
 
 from prayertimes.ui.abstract import Dialog
 
@@ -27,10 +27,14 @@ class CriticalExceptionDialog(Dialog):
     """
 
     def __init__(self, parent=None):
-        super(CriticalExceptionDialog, self).__init__(width=670, height=380,
-                                                      obj_name=self.__class__.__name__,
-                                                      titlebar_name="Exception", titlebar_icon=None,
-                                                      parent=parent)
+        super(CriticalExceptionDialog, self).__init__(
+            width=670,
+            height=380,
+            obj_name=self.__class__.__name__,
+            titlebar_name="Exception",
+            titlebar_icon=None,
+            parent=parent,
+        )
 
         self.v_layout = QtWidgets.QVBoxLayout()
 

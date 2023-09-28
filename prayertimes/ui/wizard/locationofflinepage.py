@@ -16,10 +16,10 @@
 # more details.                                                               #
 # --------------------------------------------------------------------------- #
 
-from PyQt5 import QtWidgets
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPixmap, QIcon, QStandardItem, QStandardItemModel
-from PyQt5.QtSql import QSqlDatabase, QSqlQuery
+from PyQt6 import QtWidgets
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QPixmap, QIcon, QStandardItem, QStandardItemModel
+from PyQt6.QtSql import QSqlDatabase, QSqlQuery
 
 from prayertimes.core.common.logapi import log
 from prayertimes.core.common.resourceslocation import ResourcesLocation
@@ -32,15 +32,14 @@ from prayertimes.utils.widgets.waitoverlay import WaitingOverlay
 
 
 class CityCompleter(QtWidgets.QCompleter):
-
     def __init__(self, parent=None):
         super(CityCompleter, self).__init__(parent)
         self.popup().setObjectName(self.__class__.__name__)
 
-        self.setCaseSensitivity(Qt.CaseInsensitive)
-        self.setCompletionMode(QtWidgets.QCompleter.PopupCompletion)
+        self.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
+        self.setCompletionMode(QtWidgets.QCompleter.CompletionMode.PopupCompletion)
         self.setWrapAround(False)
-        self.setFilterMode(Qt.MatchStartsWith)
+        self.setFilterMode(Qt.MatchFlag.MatchStartsWith)
         self.setMaxVisibleItems(7)  # Default value is 7
 
     def setModel(self, model):
@@ -56,7 +55,6 @@ class CityCompleter(QtWidgets.QCompleter):
 
 
 class LineEditCityCompleter(QtWidgets.QLineEdit):
-
     def __init__(self, parent=None):
         super(LineEditCityCompleter, self).__init__(parent)
         self.setObjectName("LineEdit")
@@ -89,8 +87,8 @@ class OfflineFrameWizard(QtWidgets.QFrame):
 
         self.setLayout(self.layout)
 
-        self.line_edit.textChanged[str].connect(self.on_city_changed)
-        self.line_edit.city_completer.activated[str].connect(self.on_selected_city)
+        self.line_edit.textChanged.connect(self.on_city_changed)
+        self.line_edit.city_completer.activated.connect(self.on_selected_city)
 
         self.load_cities = TaskThread(_function=self.__set_database)
         self.load_cities.finished.connect(self.finished_loading)
@@ -105,8 +103,8 @@ class OfflineFrameWizard(QtWidgets.QFrame):
         QSqlDatabase.removeDatabase(self.db.databaseName())
 
     def __set_database(self):
-        self.db = QSqlDatabase('QSQLITE')
-        self.db.setDatabaseName(ResourcesLocation().database_dir + '/database.db')
+        self.db = QSqlDatabase("QSQLITE")
+        self.db.setDatabaseName(ResourcesLocation().database_dir + "/database.db")
         if self.db.open():
             log.debug("Opened database")
 
@@ -126,8 +124,12 @@ class OfflineFrameWizard(QtWidgets.QFrame):
         while query.next():
             record = query.record()
             item = QStandardItem()
-            item.setIcon(QIcon(":/icons/countries/{}.png".format(str(record.value('cc')))))
-            nam = "{}, {}, {}".format(record.value('city'), record.value('state'), record.value('country'))
+            item.setIcon(
+                QIcon(":/icons/countries/{}.png".format(str(record.value("cc"))))
+            )
+            nam = "{}, {}, {}".format(
+                record.value("city"), record.value("state"), record.value("country")
+            )
             item.setText(nam)
             model.appendRow(item)
 
@@ -154,10 +156,16 @@ class OfflineFrameWizard(QtWidgets.QFrame):
 
         while query.next():
             record = query.record()
-            city_dict = dict(continent=record.value('continent'), city=record.value('city'),
-                             state=record.value('state'), country=record.value('country'),
-                             cc=record.value('cc'), lat=record.value('lat'),
-                             lng=record.value('lng'), tz=record.value('tz'))
+            city_dict = dict(
+                continent=record.value("continent"),
+                city=record.value("city"),
+                state=record.value("state"),
+                country=record.value("country"),
+                cc=record.value("cc"),
+                lat=record.value("lat"),
+                lng=record.value("lng"),
+                tz=record.value("tz"),
+            )
         return city_dict
 
     def on_city_changed(self, text):
@@ -183,17 +191,25 @@ class OfflineFrameWizard(QtWidgets.QFrame):
         :param text: selected text in QCompleter, is composed of the city, state and country.
         :return:
         """
-        [city, state, country] = list(map(str.strip, text.split(',')))
+        [city, state, country] = list(map(str.strip, text.split(",")))
         query = QSqlQuery(self.db)
-        query.exec("SELECT * FROM DATABASE WHERE city='{}' AND state='{}' "
-                   "AND country='{}'".format(city, state, country))
+        query.exec(
+            "SELECT * FROM DATABASE WHERE city='{}' AND state='{}' "
+            "AND country='{}'".format(city, state, country)
+        )
 
         while query.next():
             record = query.record()
-            city_dict = dict(continent=record.value('continent'), city=record.value('city'),
-                             state=record.value('state'), country=record.value('country'),
-                             cc=record.value('cc'), lat=record.value('lat'),
-                             lng=record.value('lng'), tz=record.value('tz'))
+            city_dict = dict(
+                continent=record.value("continent"),
+                city=record.value("city"),
+                state=record.value("state"),
+                country=record.value("country"),
+                cc=record.value("cc"),
+                lat=record.value("lat"),
+                lng=record.value("lng"),
+                tz=record.value("tz"),
+            )
             c = City(city_dict)
             self.frame_city.update_labels(c)
             self.frame_city.show()
@@ -204,20 +220,27 @@ class OfflineFrameWizard(QtWidgets.QFrame):
 
 
 class LocationOfflinePage(QtWidgets.QWizardPage):
-
     def __init__(self, parent=None):
         super(LocationOfflinePage, self).__init__(parent)
 
         self.setObjectName(self.__class__.__name__)
-        self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        self.setSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Expanding,
+            QtWidgets.QSizePolicy.Policy.Expanding,
+        )
 
         self.setTitle("Offline Location Platform\n")
-        self.setSubTitle("Database Geolocation tool helps you find the "
-                         "approximate geographic location of your city along with some other useful "
-                         "information TimeZone, Country Code, State etc. to determine prayer times settings.\n\n"
-                         "Database information is not very accurate and may contain errors, please verify before "
-                         "proceed")
-        self.setPixmap(QtWidgets.QWizard.BannerPixmap, QPixmap(":/icons/wizard_map.png"))
+        self.setSubTitle(
+            "Database Geolocation tool helps you find the "
+            "approximate geographic location of your city along with some other useful "
+            "information TimeZone, Country Code, State etc. to determine prayer times settings.\n\n"
+            "Database information is not very accurate and may contain errors, please verify before "
+            "proceed"
+        )
+        self.setPixmap(
+            QtWidgets.QWizard.WizardPixmap.BannerPixmap,
+            QPixmap(":/icons/wizard_map.png"),
+        )
 
         self.layout = QtWidgets.QVBoxLayout(self)
 
@@ -243,4 +266,3 @@ class LocationOfflinePage(QtWidgets.QWizardPage):
         """
         # self.offline_frame.cleanup()
         return super(LocationOfflinePage, self).cleanupPage()
-

@@ -18,8 +18,8 @@
 
 import os
 
-from PyQt5 import QtWidgets
-from PyQt5.QtCore import Qt
+from PyQt6 import QtWidgets
+from PyQt6.QtCore import Qt
 
 from prayertimes.ui.wizard.lastpage import LastPage
 from prayertimes.ui.wizard.locationofflinepage import LocationOfflinePage
@@ -45,12 +45,13 @@ class QuantumPTWizard(QtWidgets.QWizard):
         # Need to be added, if not, moving frame from a button crash
         self.pressed = 0
         self.offset = self.pos()
+        self.was_cancelled = False
 
-        self.finish_button = self.button(QtWidgets.QWizard.FinishButton)
-        self.cancel_button = self.button(QtWidgets.QWizard.CancelButton)
-        self.next_button = self.button(QtWidgets.QWizard.NextButton)
-        self.back_button = self.button(QtWidgets.QWizard.BackButton)
-        self.default_button = self.button(QtWidgets.QWizard.CustomButton1)
+        self.finish_button = self.button(QtWidgets.QWizard.WizardButton.FinishButton)
+        self.cancel_button = self.button(QtWidgets.QWizard.WizardButton.CancelButton)
+        self.next_button = self.button(QtWidgets.QWizard.WizardButton.NextButton)
+        self.back_button = self.button(QtWidgets.QWizard.WizardButton.BackButton)
+        self.default_button = self.button(QtWidgets.QWizard.WizardButton.CustomButton1)
 
         self.setup_ui()
 
@@ -76,7 +77,7 @@ class QuantumPTWizard(QtWidgets.QWizard):
         :return:
         """
         self.setObjectName(self.__class__.__name__)
-        self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint)
+        self.setWindowFlags(self.windowFlags() | Qt.WindowType.FramelessWindowHint)
 
         self.finish_button.setFixedWidth(100)
         self.cancel_button.setFixedWidth(100)
@@ -84,19 +85,28 @@ class QuantumPTWizard(QtWidgets.QWizard):
         self.back_button.setFixedWidth(100)
         self.default_button.setFixedWidth(100)
 
-        button_layout = [QtWidgets.QWizard.CustomButton1, QtWidgets.QWizard.Stretch, QtWidgets.QWizard.BackButton,
-                         QtWidgets.QWizard.NextButton, QtWidgets.QWizard.FinishButton, QtWidgets.QWizard.CancelButton]
+        button_layout = [
+            QtWidgets.QWizard.WizardButton.CustomButton1,
+            QtWidgets.QWizard.WizardButton.Stretch,
+            QtWidgets.QWizard.WizardButton.BackButton,
+            QtWidgets.QWizard.WizardButton.NextButton,
+            QtWidgets.QWizard.WizardButton.FinishButton,
+            QtWidgets.QWizard.WizardButton.CancelButton,
+        ]
         self.setButtonLayout(button_layout)
 
         self.setModal(True)
         self.setFixedSize(820, 500)
 
-        self.setOptions(QtWidgets.QWizard.IndependentPages | QtWidgets.QWizard.NoBackButtonOnStartPage)
+        self.setOptions(
+            QtWidgets.QWizard.WizardOption.IndependentPages
+            | QtWidgets.QWizard.WizardOption.NoBackButtonOnStartPage
+        )
 
-        self.setOption(QtWidgets.QWizard.HaveCustomButton1, True)
-        self.setButtonText(QtWidgets.QWizard.CustomButton1, "Default")
+        self.setOption(QtWidgets.QWizard.WizardOption.HaveCustomButton1, True)
+        self.setButtonText(QtWidgets.QWizard.WizardButton.CustomButton1, "Default")
 
-        self.setWizardStyle(QtWidgets.QWizard.ModernStyle)
+        self.setWizardStyle(QtWidgets.QWizard.WizardStyle.ModernStyle)
 
     def mousePressEvent(self, event):
         self.offset = event.pos()
@@ -104,11 +114,11 @@ class QuantumPTWizard(QtWidgets.QWizard):
 
     def mouseMoveEvent(self, event):
         if self.pressed:
-            x = event.globalX()
-            y = event.globalY()
+            x = event.globalPosition().x()
+            y = event.globalPosition().y()
             x_w = self.offset.x()
             y_w = self.offset.y()
-            self.move(x - x_w, y - y_w)
+            self.move(int(x - x_w), int(y - y_w))
 
     def mouseReleaseEvent(self, event):
         self.pressed = 0
@@ -120,7 +130,10 @@ class QuantumPTWizard(QtWidgets.QWizard):
         :param event:
         :return:
         """
-        self.move(QtWidgets.QApplication.desktop().screen().rect().center() - self.rect().center())
+        self.move(
+            QtWidgets.QApplication.primaryScreen().availableGeometry().center()
+            - self.rect().center()
+        )
         return super(QuantumPTWizard, self).showEvent(event)
 
     def exec(self):
@@ -134,7 +147,7 @@ class QuantumPTWizard(QtWidgets.QWizard):
         Stop the wizard on cancel button, close button or ESC key.
         Remove settings file if wizard is not completed.
         """
-        log.debug('Wizard cancelled by user.')
+        log.debug("Wizard cancelled by user.")
         self.was_cancelled = True
         if os.path.exists(Settings().fileName()):
             try:
@@ -148,7 +161,7 @@ class QuantumPTWizard(QtWidgets.QWizard):
         The wizard finished correctly.
         Extend settings defined by user by default settings.
         """
-        log.debug('Wizard finished. Saving settings ...')
+        log.debug("Wizard finished. Saving settings ...")
         Settings().extend_current_settings()
         return super(QuantumPTWizard, self).accept()
 
@@ -170,9 +183,9 @@ class QuantumPTWizard(QtWidgets.QWizard):
         elif page_id == self.last_page_id:
             self.default_button.setDisabled(True)
         elif page_id == -1:
-            log.debug('Canceled by user ...')
+            log.debug("Canceled by user ...")
         else:
-            log.error('{} Should never fall here'.format('on_current_id_changed'))
+            log.error("{} Should never fall here".format("on_current_id_changed"))
 
     def on_default_button_clicked(self):
         """
@@ -191,4 +204,4 @@ class QuantumPTWizard(QtWidgets.QWizard):
         elif self.currentId() == self.last_page_id:
             pass
         else:
-            log.error('{} Should never fall here'.format('on_default_button_clicked'))
+            log.error("{} Should never fall here".format("on_default_button_clicked"))

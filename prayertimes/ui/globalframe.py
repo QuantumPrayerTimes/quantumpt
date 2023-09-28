@@ -16,7 +16,7 @@
 # more details.                                                               #
 # --------------------------------------------------------------------------- #
 
-from PyQt5 import QtWidgets
+from PyQt6 import QtWidgets
 
 from prayertimes.core.common.logapi import log
 from prayertimes.core.common.registry import Registry
@@ -24,7 +24,11 @@ from prayertimes.core.common.settings import Settings
 
 from prayertimes.ui.abstract import GlobalTitlebar, AbstractGlobalFrame
 from prayertimes.ui.principalframe import PrincipalFrame
-from prayertimes.ui.systemtray import SystemTrayIcon, FloatingNotificationArea, SysTrayPanel
+from prayertimes.ui.systemtray import (
+    SystemTrayIcon,
+    FloatingNotificationArea,
+    SysTrayPanel,
+)
 
 from prayertimes.utils.widgets.principaloverlay import PrincipalOverlay
 
@@ -35,7 +39,9 @@ class GlobalFrame(AbstractGlobalFrame):
     """
 
     def __init__(self, parent=None):
-        super(GlobalFrame, self).__init__(width=970, height=600, obj_name=self.__class__.__name__, parent=parent)
+        super(GlobalFrame, self).__init__(
+            width=970, height=600, obj_name=self.__class__.__name__, parent=parent
+        )
 
         self.main_layout = QtWidgets.QVBoxLayout(self)
 
@@ -88,8 +94,11 @@ class GlobalFrame(AbstractGlobalFrame):
         # self.fade_out()
         self.hide()  # hide() function calls close() funtion
         log.debug("Running in background...")
-        Registry().execute("show_floating_notification",
-                           "QuantumPrayerTimes program is still running in background", 3000)
+        Registry().execute(
+            "show_floating_notification",
+            "QuantumPrayerTimes program is still running in background",
+            3000,
+        )
 
     def cleanup(self):
         """
@@ -101,7 +110,7 @@ class GlobalFrame(AbstractGlobalFrame):
         self.hide()
 
         # Needed for Windows to stop crashes on exit
-        Registry().remove('application')
+        Registry().remove("application")
 
     def closeEvent(self, event):
         """
@@ -110,9 +119,9 @@ class GlobalFrame(AbstractGlobalFrame):
         :param event:
         :return:
         """
-        if Settings().value('general_settings/close') == 1:
+        if Settings().value("general_settings/close") == 1:
             self.close_application()
-        elif Settings().value('general_settings/close') == 0:
+        elif Settings().value("general_settings/close") == 0:
             self.hide_in_systray()
         else:
             log.warning("Not defined, by default, use hide in system tray")

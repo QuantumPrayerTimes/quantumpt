@@ -22,7 +22,7 @@ from prayertimes import main
 from prayertimes.core.common import is_win
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Add support for using multiprocessing from frozen Windows executable (built using PyInstaller),
     # see https://docs.python.org/3/library/multiprocessing.html#multiprocessing.freeze_support
     if is_win():

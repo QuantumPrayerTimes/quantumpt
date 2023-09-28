@@ -34,36 +34,37 @@ class IPgetter(object):
     """
 
     def __init__(self):
-        self.server_list = \
-            ['http://ip.dnsexit.com',
-             'http://ipecho.net/plain',
-             'http://www.my-ip-address.net/',
-             'http://myexternalip.com/raw',
-             'http://www.canyouseeme.org/',
-             'http://www.trackip.net/',
-             'http://icanhazip.com/',
-             'http://www.ipchicken.com/',
-             'http://whatsmyip.net/',
-             'http://www.ip-adress.com/',
-             'http://checkmyip.com/',
-             'http://www.tracemyip.org/',
-             'http://www.lawrencegoetz.com/programs/ipinfo/',
-             'http://ipgoat.com/',
-             'http://www.myipnumber.com/my-ip-address.asp',
-             'http://formyip.com/',
-             'http://www.displaymyip.com/',
-             'http://www.bobborst.com/tools/whatsmyip/',
-             'http://www.geoiptool.com/',
-             'https://www.whatsmydns.net/whats-my-ip-address.html',
-             'http://myexternalip.com/',
-             'http://www.ip-adress.eu/',
-             'http://www.infosniper.net/',
-             'https://wtfismyip.com/text',
-             'http://ipinfo.io/',
-             'http://httpbin.org/ip',
-             'http://ip.ajn.me',
-             'https://diagnostic.opendns.com/myip',
-             'https://api.ipify.org']
+        self.server_list = [
+            "http://ip.dnsexit.com",
+            "http://ipecho.net/plain",
+            "http://www.my-ip-address.net/",
+            "http://myexternalip.com/raw",
+            "http://www.canyouseeme.org/",
+            "http://www.trackip.net/",
+            "http://icanhazip.com/",
+            "http://www.ipchicken.com/",
+            "http://whatsmyip.net/",
+            "http://www.ip-adress.com/",
+            "http://checkmyip.com/",
+            "http://www.tracemyip.org/",
+            "http://www.lawrencegoetz.com/programs/ipinfo/",
+            "http://ipgoat.com/",
+            "http://www.myipnumber.com/my-ip-address.asp",
+            "http://formyip.com/",
+            "http://www.displaymyip.com/",
+            "http://www.bobborst.com/tools/whatsmyip/",
+            "http://www.geoiptool.com/",
+            "https://www.whatsmydns.net/whats-my-ip-address.html",
+            "http://myexternalip.com/",
+            "http://www.ip-adress.eu/",
+            "http://www.infosniper.net/",
+            "https://wtfismyip.com/text",
+            "http://ipinfo.io/",
+            "http://httpbin.org/ip",
+            "http://ip.ajn.me",
+            "https://diagnostic.opendns.com/myip",
+            "https://api.ipify.org",
+        ]
 
     def get_externalip(self):
         """
@@ -71,10 +72,10 @@ class IPgetter(object):
 
         :return:
         """
-        my_ip = ''
+        my_ip = ""
         for i in range(7):
             my_ip = self.fetch(random.choice(self.server_list))
-            if my_ip != '':
+            if my_ip != "":
                 return my_ip
             else:
                 continue
@@ -96,11 +97,12 @@ class IPgetter(object):
             content = request.text
 
             m = re.search(
-                '(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.'
-                '(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)',
-                content)
+                "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\."
+                "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)",
+                content,
+            )
             myip = m.group(0)
-            return myip if len(myip) > 0 else ''
+            return myip if len(myip) > 0 else ""
         except (requests.ConnectionError, requests.ConnectTimeout):
             log.error("Error on server {}".format(server))
             return ""
@@ -122,16 +124,21 @@ class IPgetter(object):
 
         ips = sorted(resultdict.values())
         ips_set = set(ips)
-        log.debug('\nNumber of servers: {}'.format(len(self.server_list)))
+        log.debug("\nNumber of servers: {}".format(len(self.server_list)))
         log.debug("IP's :")
         for ip, ocorrencia in zip(ips_set, map(lambda x: ips.count(x), ips_set)):
-            log.debug('{0} = {1} ocurrenc{2}'.format(ip if len(ip) > 0 else 'broken server',
-                                                     ocorrencia, 'y' if ocorrencia == 1 else 'ies'))
-        log.debug('\n')
+            log.debug(
+                "{0} = {1} ocurrenc{2}".format(
+                    ip if len(ip) > 0 else "broken server",
+                    ocorrencia,
+                    "y" if ocorrencia == 1 else "ies",
+                )
+            )
+        log.debug("\n")
         log.debug(resultdict)
 
 
-def connected_to_internet(url='http://www.google.com/', timeout=5):
+def connected_to_internet(url="http://www.google.com/", timeout=5):
     """
     Check if it is connected to internet.
 
@@ -155,7 +162,7 @@ def get_public_ip():
     """
     public_ip = IPgetter().get_externalip()
 
-    log.debug('public IP address is: {}'.format(str(public_ip)))
+    log.debug("public IP address is: {}".format(str(public_ip)))
     return public_ip
 
 
@@ -169,7 +176,7 @@ def get_location_from_ip(ip, database):
     """
     reader = None
     try:
-        log.debug('database path: {}'.format(database))
+        log.debug("database path: {}".format(database))
 
         reader = geoip2.database.Reader(database)
         response = reader.city(ip)
@@ -183,8 +190,16 @@ def get_location_from_ip(ip, database):
         tz = response.location.time_zone
         state = response.subdivisions.most_specific.name
 
-        return dict(continent=continent, country=country, state=state,
-                    city=city, cc=cc, lat=lat, lng=lng, tz=tz)
+        return dict(
+            continent=continent,
+            country=country,
+            state=state,
+            city=city,
+            cc=cc,
+            lat=lat,
+            lng=lng,
+            tz=tz,
+        )
 
     except OSError as e:
         log.exception(e)

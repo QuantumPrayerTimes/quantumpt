@@ -16,9 +16,9 @@
 # more details.                                                               #
 # --------------------------------------------------------------------------- #
 
-from PyQt5 import QtWidgets
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPainter, QBrush, QColor
+from PyQt6 import QtWidgets
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QPainter, QBrush, QColor
 
 from prayertimes.core.common.registrymixin import RegistryMixin
 from prayertimes.core.common.registry import Registry
@@ -40,7 +40,7 @@ class PrincipalOverlay(RegistryMixin, QtWidgets.QFrame):
     def __init__(self, parent=None):
         super(PrincipalOverlay, self).__init__(parent)
 
-        self.setWindowFlags(Qt.FramelessWindowHint)
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
         self._parent = parent
 
     def __application_init__(self):
@@ -51,7 +51,7 @@ class PrincipalOverlay(RegistryMixin, QtWidgets.QFrame):
     def paintEvent(self, event):
         painter = QPainter()
         painter.begin(self)
-        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         painter.fillRect(event.rect(), QBrush(QColor(0, 0, 0, 60)))
         self.resize(self._parent.width(), self._parent.height())
 

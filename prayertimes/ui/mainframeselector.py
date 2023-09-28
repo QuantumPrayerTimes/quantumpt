@@ -16,9 +16,9 @@
 # more details.                                                               #
 # --------------------------------------------------------------------------- #
 
-from PyQt5 import QtWidgets
-from PyQt5.QtCore import Qt, QPoint
-from PyQt5.QtGui import QColor
+from PyQt6 import QtWidgets
+from PyQt6.QtCore import Qt, QPoint
+from PyQt6.QtGui import QColor
 
 from prayertimes.core.common import translate
 from prayertimes.core.common.registry import Registry
@@ -34,23 +34,26 @@ from prayertimes.utils.widgets.widgetanimation import AlternatePositionAnimation
 
 
 class ToolButton(QtWidgets.QToolButton):
-
     def __init__(self, obj_name, parent=None):
         super(ToolButton, self).__init__(parent)
 
         self.setObjectName(obj_name)
 
-        self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        self.setSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Expanding,
+            QtWidgets.QSizePolicy.Policy.Expanding,
+        )
 
 
-class MainFrameSelector(UniqueRegistryMixin, AlternatePositionAnimation, QtWidgets.QFrame):
-
+class MainFrameSelector(
+    UniqueRegistryMixin, AlternatePositionAnimation, QtWidgets.QFrame
+):
     def __init__(self, parent=None):
         super(MainFrameSelector, self).__init__(parent)
 
         self.setFixedWidth(135)
 
-        self.setWindowFlags(Qt.FramelessWindowHint)
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
         self.setObjectName(self.__class__.__name__)
 
         # TODO - Fix when resizing
@@ -67,13 +70,20 @@ class MainFrameSelector(UniqueRegistryMixin, AlternatePositionAnimation, QtWidge
         self.h_layout = QtWidgets.QHBoxLayout()
         self.h_layout.setSpacing(0)
 
-        self.side_label = QtWidgets.QLabel(translate('Application', 'Settings'), self)
+        self.side_label = QtWidgets.QLabel(translate("Application", "Settings"), self)
         self.side_label.setObjectName("TopSideLabel")
 
         self.time_label = TimeLabel(self)
 
-        self.sl_1 = SideLabel(parent=self, label=translate('Application', "Prayer Times"),  icon=None,
-                              w_colorframe=3, h_colorframe=80, alignment='right', color=QColor(0, 152, 206))
+        self.sl_1 = SideLabel(
+            parent=self,
+            label=translate("Application", "Prayer Times"),
+            icon=None,
+            w_colorframe=3,
+            h_colorframe=80,
+            alignment="right",
+            color=QColor(0, 152, 206),
+        )
 
         self.listwidget_frame = ListWidgetSelectorFrame(self)
 
@@ -82,13 +92,13 @@ class MainFrameSelector(UniqueRegistryMixin, AlternatePositionAnimation, QtWidge
         self.listwidget_frame.setItemWidget(item_salat, self.sl_1)
 
         self.settings_dialog_tb = ToolButton(obj_name="settings_button", parent=self)
-        self.settings_dialog_tb.setFixedHeight(self.width() / 3)
+        self.settings_dialog_tb.setFixedHeight(int(self.width() / 3))
 
         self.info_dialog_tb = ToolButton(obj_name="info_button", parent=self)
-        self.info_dialog_tb.setFixedHeight(self.width() / 3)
+        self.info_dialog_tb.setFixedHeight(int(self.width() / 3))
 
         self.about_dialog_tb = ToolButton(obj_name="about_button", parent=self)
-        self.about_dialog_tb.setFixedHeight(self.width() / 3)
+        self.about_dialog_tb.setFixedHeight(int(self.width() / 3))
 
         for b in [self.settings_dialog_tb, self.info_dialog_tb, self.about_dialog_tb]:
             b.clicked.connect(self._call_dialog)
@@ -98,8 +108,12 @@ class MainFrameSelector(UniqueRegistryMixin, AlternatePositionAnimation, QtWidge
         self.setup_ui()
 
     def __application_init__(self):
-        Registry().register_function('expand_main_frame_selector', self.set_expand_animation)
-        Registry().register_function('hide_main_frame_selector', self.set_hide_animation)
+        Registry().register_function(
+            "expand_main_frame_selector", self.set_expand_animation
+        )
+        Registry().register_function(
+            "hide_main_frame_selector", self.set_hide_animation
+        )
 
     def __application_post_init__(self):
         pass
@@ -114,8 +128,11 @@ class MainFrameSelector(UniqueRegistryMixin, AlternatePositionAnimation, QtWidge
         :return:
         """
         # Resize ListWidget to fit content
-        self.listwidget_frame.setFixedSize(self.width(), self.listwidget_frame.sizeHintForRow(0) *
-                                           self.listwidget_frame.count() + 2 * self.listwidget_frame.frameWidth())
+        self.listwidget_frame.setFixedSize(
+            self.width(),
+            self.listwidget_frame.sizeHintForRow(0) * self.listwidget_frame.count()
+            + 2 * self.listwidget_frame.frameWidth(),
+        )
 
         self.layout.addWidget(self.side_label)
         self.layout.addWidget(self.listwidget_frame)
@@ -178,8 +195,8 @@ class MainFrameSelector(UniqueRegistryMixin, AlternatePositionAnimation, QtWidge
         :return:
         """
         if self.sender().objectName() == "settings_button":
-            self.settings_dialog.exec_()
+            self.settings_dialog.exec()
         elif self.sender().objectName() == "info_button":
-            self.info_dialog.exec_()
+            self.info_dialog.exec()
         elif self.sender().objectName() == "about_button":
-            self.about_dialog.exec_()
+            self.about_dialog.exec()

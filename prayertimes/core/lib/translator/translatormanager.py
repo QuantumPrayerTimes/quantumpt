@@ -16,8 +16,8 @@
 # more details.                                                               #
 # --------------------------------------------------------------------------- #
 
-from PyQt5 import QtWidgets
-from PyQt5.QtCore import QTranslator
+from PyQt6 import QtWidgets
+from PyQt6.QtCore import QTranslator
 
 from prayertimes.core.common.logapi import log
 
@@ -26,9 +26,10 @@ class LanguageManager(object):
     """
     Helper for Language selection.
     """
+
     __instance__ = None
 
-    def __new__(cls, language='en_US'):
+    def __new__(cls, language="en_US"):
         """
         Re-implement method __new__ to have a singleton.
         """
@@ -36,19 +37,21 @@ class LanguageManager(object):
             cls.__instance__ = object.__new__(cls)
         return cls.__instance__
 
-    def __init__(self, language='en_US'):
-        languages = ['en_US', 'fr_FR', 'ar_AR']
+    def __init__(self, language="en_US"):
+        languages = ["en_US", "fr_FR", "ar_AR"]
         self.current_language = language
 
         self.translators = {}
 
         for _language in languages:
             self.translator = QTranslator()
-            if self.translator.load(':/i18n/{}.qm'.format(_language)):
-                log.debug('Translation {} has been correclty initialized'.format(_language))
+            if self.translator.load(":/i18n/{}.qm".format(_language)):
+                log.debug(
+                    "Translation {} has been correclty initialized".format(_language)
+                )
             if _language == self.current_language:
                 QtWidgets.QApplication.instance().installTranslator(self.translator)
-                log.info('Translation {} has been correclty loaded'.format(_language))
+                log.info("Translation {} has been correclty loaded".format(_language))
 
             self.translators[_language] = self.translator
 

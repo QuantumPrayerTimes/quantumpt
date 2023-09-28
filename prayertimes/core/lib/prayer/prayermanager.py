@@ -26,7 +26,12 @@ from prayertimes.core.common.settings import Settings
 
 from prayertimes.core.lib.multimedia.mediamanager import MediaManager
 from prayertimes.core.lib.prayer.prayertimes import PrayTimes
-from prayertimes.core.lib.prayer.utils import dt_from_string, from_12_to_24, from_24_to_12, get_hour_minute
+from prayertimes.core.lib.prayer.utils import (
+    dt_from_string,
+    from_12_to_24,
+    from_24_to_12,
+    get_hour_minute,
+)
 from prayertimes.core.lib.scheduler.schedulermanager import SchedulerManager
 
 from prayertimes.utils.city_infos import City
@@ -42,7 +47,6 @@ class PrayerManager(UniqueRegistryMixin, RegistryProperties):
     method_list = PrayTimes.method_list
 
     def __init__(self):
-
         super(PrayerManager, self).__init__(None)
 
         # Handle the audio part
@@ -54,7 +58,7 @@ class PrayerManager(UniqueRegistryMixin, RegistryProperties):
         self.city_object = City({})
 
         # Default configuration is ISNA and 24h format
-        self.praytimes = PrayTimes('ISNA', format_time="24h")
+        self.praytimes = PrayTimes("ISNA", format_time="24h")
         self.date = datetime.datetime.today()
 
         # Structures used for calculation of the prayertimes
@@ -63,16 +67,23 @@ class PrayerManager(UniqueRegistryMixin, RegistryProperties):
         self.praytimes_settings = {}
 
         for p_name in self.prayer_frame.praytimes.keys():
-            self.prayer_frame.praytimes[p_name].adjust_pt.valueChanged.connect(partial(self.adjust_offset,
-                                                                                       prayer=p_name))
-            self.prayer_frame.praytimes[p_name].activated_cb.stateChanged.connect(partial(self.state_control_athan,
-                                                                                          prayer=p_name))
-            self.prayer_frame.praytimes[p_name].mute_cb.stateChanged.connect(partial(self.mute_control_athan,
-                                                                                     prayer=p_name))
+            self.prayer_frame.praytimes[p_name].adjust_pt.valueChanged.connect(
+                partial(self.adjust_offset, prayer=p_name)
+            )
+            self.prayer_frame.praytimes[p_name].activated_cb.stateChanged.connect(
+                partial(self.state_control_athan, prayer=p_name)
+            )
+            self.prayer_frame.praytimes[p_name].mute_cb.stateChanged.connect(
+                partial(self.mute_control_athan, prayer=p_name)
+            )
 
     def __application_init__(self):
-        Registry().register_function("update_prayer_scheduler", self.update_prayer_scheduler)
-        Registry().register_function("update_calculation_method", self.update_calculation)
+        Registry().register_function(
+            "update_prayer_scheduler", self.update_prayer_scheduler
+        )
+        Registry().register_function(
+            "update_calculation_method", self.update_calculation
+        )
         Registry().register_function("update_asr_settings", self.update_asr_settings)
         Registry().register_function("udpate_time_format", self.udpate_time_format)
         Registry().register_function("validate_prayertimes", self.valid_prayertime)
@@ -99,14 +110,16 @@ class PrayerManager(UniqueRegistryMixin, RegistryProperties):
 
         :return:
         """
-        if self.city_object.city == "" or (self.city_object.lat == 0 and self.city_object.lng == 0):
+        if self.city_object.city == "" or (
+            self.city_object.lat == 0 and self.city_object.lng == 0
+        ):
             log.error("city empty, or latitude and longitude empty")
             return
 
         # Update calculation method
         calc = Settings().value("prayer_settings/calculation")
         if not calc:
-            calc = 'ISNA'
+            calc = "ISNA"
             log.error("Big error ! Should never fall here")
         self.praytimes.set_method(calc)
 
@@ -123,11 +136,16 @@ class PrayerManager(UniqueRegistryMixin, RegistryProperties):
 
         # Update the date and according UTC offset.
         self.date = datetime.datetime.today()
-        self.city_object.utc = get_utc_offset(timezone=self.city_object.tz, date=self.date)
+        self.city_object.utc = get_utc_offset(
+            timezone=self.city_object.tz, date=self.date
+        )
 
         # Calculate prayertimes times
-        times = self.praytimes.get_times(date=self.date, coords=(self.city_object.lat, self.city_object.lng),
-                                         utc_offset=self.city_object.utc)
+        times = self.praytimes.get_times(
+            date=self.date,
+            coords=(self.city_object.lat, self.city_object.lng),
+            utc_offset=self.city_object.utc,
+        )
 
         for prayer in self.prayer_list:
             time_ = str(times[prayer.lower()]).strip()
@@ -159,19 +177,39 @@ class PrayerManager(UniqueRegistryMixin, RegistryProperties):
 
         current_time = datetime.datetime.now().time()
 
-        if self.praytimes_datetime["Fajr"] < current_time < self.praytimes_datetime["Shourouq"]:
+        if (
+            self.praytimes_datetime["Fajr"]
+            < current_time
+            < self.praytimes_datetime["Shourouq"]
+        ):
             self.prayer_frame.set_current_prayer("Fajr")
 
-        elif self.praytimes_datetime["Shourouq"] < current_time < self.praytimes_datetime["Dhuhr"]:
+        elif (
+            self.praytimes_datetime["Shourouq"]
+            < current_time
+            < self.praytimes_datetime["Dhuhr"]
+        ):
             self.prayer_frame.set_current_prayer(None)
 
-        elif self.praytimes_datetime["Dhuhr"] < current_time < self.praytimes_datetime["Asr"]:
+        elif (
+            self.praytimes_datetime["Dhuhr"]
+            < current_time
+            < self.praytimes_datetime["Asr"]
+        ):
             self.prayer_frame.set_current_prayer("Dhuhr")
 
-        elif self.praytimes_datetime["Asr"] < current_time < self.praytimes_datetime["Maghrib"]:
+        elif (
+            self.praytimes_datetime["Asr"]
+            < current_time
+            < self.praytimes_datetime["Maghrib"]
+        ):
             self.prayer_frame.set_current_prayer("Asr")
 
-        elif self.praytimes_datetime["Maghrib"] < current_time < self.praytimes_datetime["Isha"]:
+        elif (
+            self.praytimes_datetime["Maghrib"]
+            < current_time
+            < self.praytimes_datetime["Isha"]
+        ):
             self.prayer_frame.set_current_prayer("Maghrib")
         else:
             self.prayer_frame.set_current_prayer("Isha")
@@ -186,7 +224,9 @@ class PrayerManager(UniqueRegistryMixin, RegistryProperties):
         """
         log.debug("Adjusting offset for prayertimes {}".format(prayer))
 
-        if self.city_object.city == "" or (self.city_object.lat == 0 and self.city_object.lng == 0):
+        if self.city_object.city == "" or (
+            self.city_object.lat == 0 and self.city_object.lng == 0
+        ):
             log.error("city empty, or latitude and longitude empty")
             return
 
@@ -209,7 +249,9 @@ class PrayerManager(UniqueRegistryMixin, RegistryProperties):
                 self.prayer_frame.praytimes[prayer].time = from_24_to_12(dt)
 
         # Combine the current date and time and add delta from spinbox value
-        complete_date_combined = datetime.datetime.combine(self.date, dt_time) + datetime.timedelta(minutes=value)
+        complete_date_combined = datetime.datetime.combine(
+            self.date, dt_time
+        ) + datetime.timedelta(minutes=value)
 
         # Get only the time format and formatting with hh:mm
         time_formatted = get_hour_minute(complete_date_combined.time())
@@ -247,7 +289,13 @@ class PrayerManager(UniqueRegistryMixin, RegistryProperties):
         asr_method = Settings().value("prayer_settings/asr_method")
         dua_after_athan = Settings().value("prayer_settings/dua_after_athan")
 
-        Registry().execute("update_display_information", calc, asr_method, dua_after_athan, self.city_object)
+        Registry().execute(
+            "update_display_information",
+            calc,
+            asr_method,
+            dua_after_athan,
+            self.city_object,
+        )
 
         # Run scheduler that calculates prayertimes times every day
         self.scheduler_manager.run_calc_sched(func=self.update_prayer_scheduler)
@@ -342,14 +390,16 @@ class PrayerManager(UniqueRegistryMixin, RegistryProperties):
         :param settings: asr settings method.
         :return:
         """
-        if settings != 'Hanafi' and settings != 'Standard':
+        if settings != "Hanafi" and settings != "Standard":
             log.error("Please be sure to select a correct asr settings")
         self.praytimes_settings["asr"] = settings
         self.praytimes.adjust(self.praytimes_settings)
 
         # Re-schedule only asr
         self._calculate_prayer()
-        self.scheduler_manager.reschedule_athan(prayer='Asr', time=self.praytimes_datetime['Asr'])
+        self.scheduler_manager.reschedule_athan(
+            prayer="Asr", time=self.praytimes_datetime["Asr"]
+        )
 
     def update_prayer_scheduler(self):
         """

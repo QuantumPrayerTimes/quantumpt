@@ -19,7 +19,7 @@
 # project : https://openlp.org                                                #
 # --------------------------------------------------------------------------- #
 
-from PyQt5.QtCore import QDir
+from PyQt6.QtCore import QDir
 
 # Use current dir because application is run from quantum.py
 # When application is compiled and deployed, the src_folder
@@ -33,6 +33,7 @@ class ResourcesLocation(object):
     The ResourcesLocation class is a static class which retrieves the absolute directory path
     based on the directory type.
     """
+
     __AppDir__ = 1
     __ResourcesDir__ = 2
     __AthanDir__ = 3
@@ -61,34 +62,34 @@ class ResourcesLocation(object):
 
         elif dir_type == ResourcesLocation.__AthanDir__:
             app_path = _get_os_dir_path(dir_type)
-            return app_path + 'athans'
+            return app_path + "athans"
 
         elif dir_type == ResourcesLocation.__DuaDir__:
             app_path = _get_os_dir_path(dir_type)
-            return app_path + 'duas'
+            return app_path + "duas"
 
         elif dir_type == ResourcesLocation.__LanguageDir__:
             app_path = _get_os_dir_path(dir_type)
-            return app_path + 'i18n'
+            return app_path + "i18n"
 
         elif dir_type == ResourcesLocation.__IconsDir__:
             app_path = _get_os_dir_path(dir_type)
-            return app_path + 'icons'
+            return app_path + "icons"
 
         elif dir_type == ResourcesLocation.__ImagesDir__:
             app_path = _get_os_dir_path(dir_type)
-            return app_path + 'images'
+            return app_path + "images"
 
         elif dir_type == ResourcesLocation.__DatabaseDir__:
             app_path = _get_os_dir_path(dir_type)
-            return app_path + 'database'
+            return app_path + "database"
 
         elif dir_type == ResourcesLocation.__FontDir__:
             app_path = _get_os_dir_path(dir_type)
-            return app_path + 'fonts'
+            return app_path + "fonts"
 
         elif dir_type == ResourcesLocation.__LogsDir__:
-            return src_root_dir + '/logs'
+            return src_root_dir + "/logs"
 
         else:
             return _get_os_dir_path(dir_type)
@@ -139,11 +140,14 @@ def _get_os_dir_path(dir_type):
     :param dir_type: The directory type you want, for instance the data directory.
     :return: A absolute path.
     """
-    if dir_type == ResourcesLocation.__AthanDir__ or dir_type == ResourcesLocation.__DuaDir__:
-        directory = src_root_dir + '/resources/multimedia/'
+    if (
+        dir_type == ResourcesLocation.__AthanDir__
+        or dir_type == ResourcesLocation.__DuaDir__
+    ):
+        directory = src_root_dir + "/resources/multimedia/"
         if QDir().exists(directory):
             return directory
     else:
-        directory = src_root_dir + '/resources/'
+        directory = src_root_dir + "/resources/"
         if QDir().exists(directory):
             return directory

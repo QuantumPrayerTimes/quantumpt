@@ -27,8 +27,8 @@ import traceback
 
 from ipaddress import IPv4Address, IPv6Address, AddressValueError
 
-from PyQt5 import QtCore
-from PyQt5.QtCore import QCryptographicHash
+from PyQt6 import QtCore
+from PyQt6.QtCore import QCryptographicHash
 
 from prayertimes.core.common.logapi import log
 
@@ -42,7 +42,9 @@ def trace_error_handler(logger):
     """
     log_string = "QuantumPT Error trace"
     for tb in traceback.extract_stack():
-        log_string = '{}\n   File {} at line {} \n\t called {}'.format(log_string, tb[0], tb[1], tb[3])
+        log_string = "{}\n   File {} at line {} \n\t called {}".format(
+            log_string, tb[0], tb[1], tb[3]
+        )
     logger.error(log_string)
 
 
@@ -55,18 +57,20 @@ def check_directory_exists(directory, do_not_log=False):
     :return:
     """
     if not do_not_log:
-        log.debug('check_directory_exists {}'.format(directory))
+        log.debug("check_directory_exists {}".format(directory))
     try:
         if not os.path.exists(directory):
             os.makedirs(directory)
     except IOError:
         if not do_not_log:
-            log.exception('failed to check if directory exists or create directory')
+            log.exception("failed to check if directory exists or create directory")
 
 
-def translate(context, text, comment=None, qt_translate=QtCore.QCoreApplication.translate):
+def translate(
+    context, text, comment=None, qt_translate=QtCore.QCoreApplication.translate
+):
     """
-    A special shortcut method to wrap around the Qt5 translation functions.
+    A special shortcut method to wrap around the Qt translation functions.
     This abstracts the translation procedure so that we can change it if at a
     later date if necessary, without having to redo the whole of QuantumPT.
 
@@ -86,11 +90,11 @@ def de_hump(name):
     :param name:
     :return:
     """
-    first_camel_case = re.compile('(.)([A-Z][a-z]+)')
-    second_camel_case = re.compile('([a-z0-9])([A-Z])')
+    first_camel_case = re.compile("(.)([A-Z][a-z]+)")
+    second_camel_case = re.compile("([a-z0-9])([A-Z])")
 
-    sub_name = first_camel_case.sub(r'\1_\2', name)
-    return second_camel_case.sub(r'\1_\2', sub_name).lower()
+    sub_name = first_camel_case.sub(r"\1_\2", name)
+    return second_camel_case.sub(r"\1_\2", sub_name).lower()
 
 
 def is_win():
@@ -99,7 +103,7 @@ def is_win():
 
     :return: True if system is running a nt kernel false otherwise
     """
-    return os.name.startswith('nt')
+    return os.name.startswith("nt")
 
 
 def is_macosx():
@@ -108,7 +112,7 @@ def is_macosx():
 
     :return: True if system is running a darwin kernel false otherwise
     """
-    return sys.platform.startswith('darwin')
+    return sys.platform.startswith("darwin")
 
 
 def is_linux():
@@ -117,7 +121,7 @@ def is_linux():
 
     :return: True if system is running a linux kernel false otherwise
     """
-    return sys.platform.startswith('linux')
+    return sys.platform.startswith("linux")
 
 
 def _validate_ipv4(addr):
@@ -168,7 +172,7 @@ def md5_hash(salt, data=None):
     :returns: str
     """
     log.debug('md5_hash(salt="%s")' % salt)
-    hash_obj = hashlib.new('md5')
+    hash_obj = hashlib.new("md5")
     hash_obj.update(salt)
     if data:
         hash_obj.update(data)
@@ -180,7 +184,7 @@ def md5_hash(salt, data=None):
 def qmd5_hash(salt, data=None):
     """
     Returns the hashed output of MD5Sum on salt, data
-    using PyQt5.QCryptographicHash
+    using PyQt6.QCryptographicHash
 
     :param salt: Initial salt
     :param data: OPTIONAL Data to hash

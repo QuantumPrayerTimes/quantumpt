@@ -16,9 +16,9 @@
 # more details.                                                               #
 # --------------------------------------------------------------------------- #
 
-from PyQt5 import QtWidgets
-from PyQt5.QtCore import Qt, QEvent
-from PyQt5.QtGui import QPixmap
+from PyQt6 import QtWidgets
+from PyQt6.QtCore import Qt, QEvent
+from PyQt6.QtGui import QPixmap
 
 from prayertimes.core.common import translate
 from prayertimes.core.common.logapi import log
@@ -29,16 +29,20 @@ from prayertimes.ui.abstract import ControlOption
 
 class ControlVolume(ControlOption):
     def __init__(self, parent=None):
-        super(ControlVolume, self).__init__(obj_name=self.__class__.__name__,
-                                            icon=":/icons/controloption_volume.png",
-                                            parent=parent)
+        super(ControlVolume, self).__init__(
+            obj_name=self.__class__.__name__,
+            icon=":/icons/controloption_volume.png",
+            parent=parent,
+        )
 
         self.vol_info = QtWidgets.QLabel("{} %".format(self.sld.value()))
-        self.vol_info.setAlignment(Qt.AlignVCenter | Qt.AlignCenter)
+        self.vol_info.setAlignment(
+            Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignCenter
+        )
         self.vol_info.setFixedWidth(40)
 
         self.sld.valueChanged.connect(self._vol_control)
-        self.sld.setValue(Settings().value('general_settings/volume'))
+        self.sld.setValue(Settings().value("general_settings/volume"))
 
         self.layout.addWidget(self.vol_info)
 
@@ -59,18 +63,20 @@ class ControlVolume(ControlOption):
         self.vol_info.setText("{} %".format(self.sld.value()))
         # Control athan, dua, player test and dua controller sound
         self.media_manager.set_volume(self.sld.value())
-        Settings().setValue('general_settings/volume', self.sld.value())
+        Settings().setValue("general_settings/volume", self.sld.value())
 
 
 class ControlOpacity(ControlOption):
     def __init__(self, parent=None):
-        super(ControlOpacity, self).__init__(obj_name=self.__class__.__name__,
-                                             icon=":/icons/controloption_opacity.png",
-                                             parent=parent)
+        super(ControlOpacity, self).__init__(
+            obj_name=self.__class__.__name__,
+            icon=":/icons/controloption_opacity.png",
+            parent=parent,
+        )
 
         self.sld.setRange(0, 100)
         self.sld.setMaximum(30)
-        self.sld.valueChanged[int].connect(self._ctrl_opacity)
+        self.sld.valueChanged.connect(self._ctrl_opacity)
 
     def showEvent(self, *args, **kwargs):
         self.move(self.parent().opacity_tb.x(), self.parent().opacity_tb.y() - 60)
@@ -88,18 +94,20 @@ class ControlOpacity(ControlOption):
 
 class ControlDua(ControlOption):
     def __init__(self, parent=None):
-        super(ControlDua, self).__init__(obj_name=self.__class__.__name__,
-                                         icon=None,
-                                         parent=parent)
+        super(ControlDua, self).__init__(
+            obj_name=self.__class__.__name__, icon=None, parent=parent
+        )
 
         self.layout.removeWidget(self.sld)
         self.layout.removeWidget(self.ctrl_icon)
 
-        self.dua_label = QtWidgets.QLabel(translate('Application', 'Activate dua scheduler (min. interval)'), self)
+        self.dua_label = QtWidgets.QLabel(
+            translate("Application", "Activate dua scheduler (interval)"), self
+        )
 
         self.spinbox_dua_timing = QtWidgets.QSpinBox(self)
         self.spinbox_dua_timing.setRange(1, 90)
-        self.spinbox_dua_timing.valueChanged[int].connect(self._control_timing)
+        self.spinbox_dua_timing.valueChanged.connect(self._control_timing)
 
         self.activated_cb = QtWidgets.QCheckBox(self)
         self.activated_cb.setChecked(False)
@@ -111,7 +119,7 @@ class ControlDua(ControlOption):
         self.layout.addWidget(self.dua_label)
         self.layout.addStretch()
         self.layout.addWidget(self.spinbox_dua_timing)
-        self.layout.addWidget(QtWidgets.QLabel('min.', self))
+        self.layout.addWidget(QtWidgets.QLabel("min.", self))
 
     def showEvent(self, *args, **kwargs):
         self.move(self.parent().dua_tb.x(), self.parent().dua_tb.y() - 60)
@@ -124,8 +132,9 @@ class ControlDua(ControlOption):
         :return:
         """
         if self.activated_cb.isChecked():
-            self.scheduler_manager.run_dua_scheduler(self.media_manager.dua_player.play,
-                                                     self.spinbox_dua_timing.value())
+            self.scheduler_manager.run_dua_scheduler(
+                self.media_manager.dua_player.play, self.spinbox_dua_timing.value()
+            )
             log.debug("Scheduler has been started")
         else:
             self.scheduler_manager.stop_dua_scheduler()
@@ -138,7 +147,7 @@ class ControlDua(ControlOption):
         :param value: minute value between duas.
         :return:
         """
-        if self.scheduler_manager.scheduler.get_job(job_id="Dua", jobstore='dua'):
+        if self.scheduler_manager.scheduler.get_job(job_id="Dua", jobstore="dua"):
             self.scheduler_manager.reschedule_dua(minutes=value)
 
     # This frame stay visible with control because it needs settings.
@@ -150,14 +159,14 @@ class ControlDua(ControlOption):
         :param event: event to catch.
         :return:
         """
-        if event.type() == QEvent.WindowActivate:
+        if event.type() == QEvent.Type.WindowActivate:
             return True
-        elif event.type() == QEvent.WindowDeactivate:
+        elif event.type() == QEvent.Type.WindowDeactivate:
             self.hide()
             return True
-        elif event.type() == QEvent.FocusIn:
+        elif event.type() == QEvent.Type.FocusIn:
             return True
-        elif event.type() == QEvent.FocusOut:
+        elif event.type() == QEvent.Type.FocusOut:
             return True
         else:
             return super(ControlDua, self).eventFilter(_, event)

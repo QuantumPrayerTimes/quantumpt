@@ -16,9 +16,9 @@
 # more details.                                                               #
 # --------------------------------------------------------------------------- #
 
-from PyQt5 import QtWidgets
-from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtGui import QIcon
+from PyQt6 import QtWidgets
+from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtGui import QAction, QIcon
 
 from prayertimes.core.common.logapi import log
 from prayertimes.core.common.registry import Registry
@@ -40,8 +40,7 @@ class SysTrayMenu(UniqueRegistryMixin, QtWidgets.QMenu):
 
         self.addSeparator()
 
-        self.exit_action = QtWidgets.QAction(QIcon(":/icons/systray_close.png"),
-                                             "Exit", self)
+        self.exit_action = QAction(QIcon(":/icons/systray_close.png"), "Exit", self)
         self.exit_action.triggered.connect(self._close)
         self.addAction(self.exit_action)
 
@@ -55,10 +54,12 @@ class SysTrayMenu(UniqueRegistryMixin, QtWidgets.QMenu):
         Registry().execute("close_application")
 
 
-class SystemTrayIcon(UniqueRegistryMixin, RegistryProperties, QtWidgets.QSystemTrayIcon):
+class SystemTrayIcon(
+    UniqueRegistryMixin, RegistryProperties, QtWidgets.QSystemTrayIcon
+):
     def __init__(self, parent=None):
         super(SystemTrayIcon, self).__init__(parent)
-        self.setIcon(QIcon(':/icons/systray_icon.png'))
+        self.setIcon(QIcon(":/icons/systray_icon.png"))
         self.setVisible(True)
 
         self.right_menu = SysTrayMenu(parent)
@@ -71,8 +72,8 @@ class SystemTrayIcon(UniqueRegistryMixin, RegistryProperties, QtWidgets.QSystemT
         if event == QtWidgets.QSystemTrayIcon.Trigger:
             if self.global_frame.isHidden():
                 self.global_frame.show()
-            if self.global_frame.windowState() & Qt.WindowMinimized:
-                self.global_frame.setWindowState(Qt.WindowActive)
+            if self.global_frame.windowState() & Qt.WindowState.WindowMinimized:
+                self.global_frame.setWindowState(Qt.WindowState.WindowActive)
             if self.global_frame.isVisible():
                 self.global_frame.window().activateWindow()
 
@@ -82,13 +83,15 @@ class FloatingNotificationArea(QtWidgets.QFrame, PMXMessageOverlay):
         super(FloatingNotificationArea, self).__init__(parent)
         super(PMXMessageOverlay, self).__init__()
 
-        self.setWindowFlags(Qt.FramelessWindowHint)
-        self.setWindowFlags(self.windowFlags() | Qt.ToolTip)
-        self.setWindowFlags(self.windowFlags() & ~Qt.WindowStaysOnTopHint)
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
+        self.setWindowFlags(self.windowFlags() | Qt.WindowType.ToolTip)
+        self.setWindowFlags(self.windowFlags() & ~Qt.WindowType.WindowStaysOnTopHint)
 
-        self.setAttribute(Qt.WA_TranslucentBackground)
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
 
-        Registry().register_function("show_floating_notification", self.show_message_sys)
+        Registry().register_function(
+            "show_floating_notification", self.show_message_sys
+        )
 
     def show_message_sys(self, _str, _time):
         """
@@ -130,25 +133,27 @@ class FloatingNotificationArea(QtWidgets.QFrame, PMXMessageOverlay):
         :param location: location where widget will be placed. (can be TopLeft - TopRight - BottomLeft - BottomRight)
         :return:
         """
-        screen = QtWidgets.QApplication.desktop().availableGeometry()
+        screen = QtWidgets.QApplication.primaryScreen().availableGeometry()
         size = self.geometry()
-        if location == 'TopLeft':
+        if location == "TopLeft":
             self.move(0, 0)
-        if location == 'TopRight':
+        if location == "TopRight":
             self.move((screen.width() - size.width()), 0)
-        if location == 'BottomLeft':
+        if location == "BottomLeft":
             self.move(0, (screen.height() - size.height()))
-        if location == 'BottomRight':
-            self.move((screen.width() - size.width()), (screen.height() - size.height()))
+        if location == "BottomRight":
+            self.move(
+                (screen.width() - size.width()), (screen.height() - size.height())
+            )
 
     def showEvent(self, event):
         self.update_message_position()
-        self.move_to(location='BottomRight')
+        self.move_to(location="BottomRight")
         return super(FloatingNotificationArea, self).showEvent(event)
 
     def resizeEvent(self, *args, **kwargs):
         self.update_message_position()
-        self.move_to(location='BottomRight')
+        self.move_to(location="BottomRight")
         return super(FloatingNotificationArea, self).resizeEvent(*args, **kwargs)
 
 
@@ -167,18 +172,20 @@ class SysTrayPanel(UniqueRegistryMixin, QtWidgets.QFrame):
         self.setObjectName(self.__class__.__name__)
         self.layout = QtWidgets.QVBoxLayout(self)
 
-        self.stop_athan_bt = QtWidgets.QPushButton("Stop Athan", clicked=self.stop_athan)
+        self.stop_athan_bt = QtWidgets.QPushButton(
+            "Stop Athan", clicked=self.stop_athan
+        )
         self.close_tb = QtWidgets.QToolButton(clicked=self.hide_systray_panel)
         self.close_tb.setIcon(QIcon(":/icons/systray_close.png"))
         self.label = QtWidgets.QLabel("There is not athan playing ...", self)
 
         self.setFixedSize(300, 120)
 
-        self.setWindowFlags(self.windowFlags() | Qt.ToolTip)
+        self.setWindowFlags(self.windowFlags() | Qt.WindowType.ToolTip)
         # self.setWindowFlags(self.windowFlags() & ~Qt.WindowStaysOnTopHint)
 
-        self.layout.addWidget(self.close_tb, alignment=Qt.AlignRight)
-        self.layout.addWidget(self.label, alignment=Qt.AlignCenter)
+        self.layout.addWidget(self.close_tb, alignment=Qt.AlignmentFlag.AlignRight)
+        self.layout.addWidget(self.label, alignment=Qt.AlignmentFlag.AlignCenter)
         self.layout.addWidget(self.stop_athan_bt)
 
         self.show_systray_signal[str].connect(self.show_systray_panel)
@@ -229,21 +236,23 @@ class SysTrayPanel(UniqueRegistryMixin, QtWidgets.QFrame):
         :param location: location where widget will be placed. (can be TopLeft - TopRight - BottomLeft - BottomRight)
         :return:
         """
-        screen = QtWidgets.QApplication.desktop().availableGeometry()
+        screen = QtWidgets.QApplication.primaryScreen().availableGeometry()
         size = self.geometry()
-        if location == 'TopLeft':
+        if location == "TopLeft":
             self.move(0, 0)
-        if location == 'TopRight':
+        if location == "TopRight":
             self.move((screen.width() - size.width()), 0)
-        if location == 'BottomLeft':
+        if location == "BottomLeft":
             self.move(0, (screen.height() - size.height()))
-        if location == 'BottomRight':
-            self.move((screen.width() - size.width()), (screen.height() - size.height()))
+        if location == "BottomRight":
+            self.move(
+                (screen.width() - size.width()), (screen.height() - size.height())
+            )
 
     def showEvent(self, event):
-        self.move_to(location='BottomRight')
+        self.move_to(location="BottomRight")
         return super(SysTrayPanel, self).showEvent(event)
 
     def resizeEvent(self, *args, **kwargs):
-        self.move_to(location='BottomRight')
+        self.move_to(location="BottomRight")
         return super(SysTrayPanel, self).resizeEvent(*args, **kwargs)

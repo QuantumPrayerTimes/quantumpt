@@ -20,8 +20,8 @@ from enum import Enum
 
 from random import choice
 
-from PyQt5.QtCore import QUrl, QDir
-from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
+from PyQt6.QtCore import QUrl, QDir
+from PyQt6.QtMultimedia import QAudioOutput, QMediaPlayer
 
 
 from prayertimes.core.common.logapi import log
@@ -41,6 +41,7 @@ class PlayerPriority(Enum):
 
     The higheset priority means the players will interrupt the player with lower priority.
     """
+
     ATHAN = 4
     DUA_AFTER_ATHAN = 3
     DUA = 2
@@ -84,19 +85,31 @@ class MediaPriorityHandler(object):
         """
         Initialize all sub classes players and their priority.
         """
-        self.__priority__[vars()['self']] = vars()['self'].priority
-        log.debug("media player available : {}".format(vars()['self'].__class__.__name__))
+        self.__priority__[vars()["self"]] = vars()["self"].priority
+        log.debug(
+            "media player available : {}".format(vars()["self"].__class__.__name__)
+        )
 
     def prioritize(self, __player):
         for player, priority in self.__priority__.items():
-
-            if player.state() == QMediaPlayer.PlayingState:
+            if player.playbackState() == QMediaPlayer.PlaybackState.PlayingState:
                 if __player == player:
-                    log.debug("media priority: new player same as previous player <{}, {}>".format(player.type.name,
-                              player.priority))
+                    log.debug(
+                        "media priority: new player same as previous player <{}, {}>".format(
+                            player.type.name, player.priority
+                        )
+                    )
                     continue
-                log.debug("media priority: current player playing <{}, {}>".format(player.type.name, player.priority))
-                log.debug("media priority: new player priority <{}, {}>".format(__player.type.name, __player.priority))
+                log.debug(
+                    "media priority: current player playing <{}, {}>".format(
+                        player.type.name, player.priority
+                    )
+                )
+                log.debug(
+                    "media priority: new player priority <{}, {}>".format(
+                        __player.type.name, __player.priority
+                    )
+                )
                 if __player.priority > priority:
                     player.stop()
                     return True
@@ -105,7 +118,11 @@ class MediaPriorityHandler(object):
             else:
                 continue
 
-        log.debug("media priority: new player <{}, {}>".format(__player.type.name, __player.priority))
+        log.debug(
+            "media priority: new player <{}, {}>".format(
+                __player.type.name, __player.priority
+            )
+        )
         return True
 
 
@@ -117,10 +134,12 @@ class MediaCore(QMediaPlayer, MediaPriorityHandler):
     # All paths of medias are declared here
     _dua_after_athan = ResourcesLocation().dua_dir + "/dua_after_athan.mp3"
 
-    list_athans_files = QDir(ResourcesLocation().athan_dir).entryList(['*.mp3'], QDir.Files)
-    list_athans = list(map(QDir(ResourcesLocation().athan_dir).filePath, list_athans_files))
+    list_athans_files = QDir(ResourcesLocation().athan_dir).entryList(["*.mp3"])
+    list_athans = list(
+        map(QDir(ResourcesLocation().athan_dir).filePath, list_athans_files)
+    )
 
-    list_douas_files = QDir(ResourcesLocation().dua_dir).entryList(['*.mp3'], QDir.Files)
+    list_douas_files = QDir(ResourcesLocation().dua_dir).entryList(["*.mp3"])
     list_douas = list(map(QDir(ResourcesLocation().dua_dir).filePath, list_douas_files))
 
     default_athan = list_athans[0]
@@ -134,7 +153,17 @@ class MediaCore(QMediaPlayer, MediaPriorityHandler):
         # Must initialize the MediaCore with a media, it is not important
         # which one because it will be set before each play function.
         self.setup_media(self.default_athan)
-        self.mediaStatusChanged[QMediaPlayer.MediaStatus].connect(self.media_status_changed)
+        self.audio_output = QAudioOutput()
+        self.setAudioOutput(self.audio_output)
+        self.mediaStatusChanged.connect(self.media_status_changed)
+
+    def setup_volume(self, volume):
+        """
+        Setup the media that will be played.
+        :param media:
+        :return:
+        """
+        self.audio_output.setVolume(float(volume / 100))
 
     def setup_media(self, media=None):
         """
@@ -142,8 +171,7 @@ class MediaCore(QMediaPlayer, MediaPriorityHandler):
         :param media:
         :return:
         """
-        url = QUrl.fromLocalFile(media)
-        self.setMedia(QMediaContent(url))
+        self.setSource(QUrl.fromLocalFile(media))
 
     def play(self):
         """
@@ -158,11 +186,11 @@ class MediaCore(QMediaPlayer, MediaPriorityHandler):
             pass
 
     def stop(self):
-        """ Override """
+        """Override"""
         return super(MediaCore, self).stop()
 
     def media_status_changed(self, status):
-        """ Override """
+        """Override"""
         pass
 
     def is_playing(self):
@@ -171,7 +199,11 @@ class MediaCore(QMediaPlayer, MediaPriorityHandler):
 
         :return:
         """
-        return True if self.state() == QMediaPlayer.PlayingState else False
+        return (
+            True
+            if self.playbackState() == QMediaPlayer.PlaybackState.PlayingState
+            else False
+        )
 
     def is_stopped(self):
         """
@@ -179,7 +211,11 @@ class MediaCore(QMediaPlayer, MediaPriorityHandler):
 
         :return:
         """
-        return True if self.state() == QMediaPlayer.StoppedState else False
+        return (
+            True
+            if self.playbackState() == QMediaPlayer.PlaybackState.StoppedState
+            else False
+        )
 
 
 class RandomMediaPlayer(MediaCore):
@@ -201,7 +237,11 @@ class RandomMediaPlayer(MediaCore):
         if self.is_playing():
             self.stop()
         else:
-            log.debug("\tPlaying file {}".format(self.currentMedia().canonicalUrl().toLocalFile()))
+            log.debug(
+                "\tPlaying file {}".format(
+                    self.currentMedia().canonicalUrl().toLocalFile()
+                )
+            )
             return super(RandomMediaPlayer, self).play()
 
 
@@ -217,13 +257,17 @@ class DuaAfterAthanPlayer(MediaCore):
         super(DuaAfterAthanPlayer, self).__init__()
 
     def play(self):
-        """ Override """
+        """Override"""
         super(DuaAfterAthanPlayer, self).setup_media(self._dua_after_athan)
-        log.debug("begin dua after athan with media {}".format(self.currentMedia().canonicalUrl().toLocalFile()))
+        log.debug(
+            "begin dua after athan with media {}".format(
+                self.currentMedia().canonicalUrl().toLocalFile()
+            )
+        )
         return super(DuaAfterAthanPlayer, self).play()
 
     def stop(self):
-        """ Override """
+        """Override"""
         return super(DuaAfterAthanPlayer, self).stop()
 
     def media_status_changed(self, status):
@@ -234,7 +278,7 @@ class DuaAfterAthanPlayer(MediaCore):
         :param status: new status of the current player.
         :return:
         """
-        if status == QMediaPlayer.EndOfMedia:
+        if status == QMediaPlayer.MediaStatus.EndOfMedia:
             log.debug("finished dua after athan normally")
             pass
 
@@ -268,7 +312,7 @@ class AthanMediaPlayer(RegistryProperties, MediaCore):
         :param kwargs:
         :return:
         """
-        self.__caller__ = kwargs.get('prayer')
+        self.__caller__ = kwargs.get("prayer")
         super(AthanMediaPlayer, self).setup_media(self.current_media)
 
         if self.is_playing() or self.dua_after_athan_player.is_playing():
@@ -276,10 +320,15 @@ class AthanMediaPlayer(RegistryProperties, MediaCore):
             super(AthanMediaPlayer, self).stop()
             self.dua_after_athan_player.stop()
 
-        log.debug("begin athan of prayer: {} with media {}".format(self.__caller__,
-                                                                   self.currentMedia().canonicalUrl().toLocalFile()))
+        log.debug(
+            "begin athan of prayer: {} with media {}".format(
+                self.__caller__, self.currentMedia().canonicalUrl().toLocalFile()
+            )
+        )
 
-        Registry().emit_signal("show_systray_panel", "Athan for {} begins".format(self.__caller__))
+        Registry().emit_signal(
+            "show_systray_panel", "Athan for {} begins".format(self.__caller__)
+        )
 
         self.prayer_frame.set_current_prayer(self.__caller__)
         self.prayer_frame.praytimes[self.__caller__].mute_cb.show()
@@ -317,7 +366,7 @@ class AthanMediaPlayer(RegistryProperties, MediaCore):
 
         :return:
         """
-        if status == QMediaPlayer.EndOfMedia:
+        if status == QMediaPlayer.MediaStatus.EndOfMedia:
             log.debug("finished playing athan normally")
             self.prayer_frame.praytimes[self.__caller__].mute_cb.hide()
 
@@ -348,11 +397,11 @@ class AthanPreviewPlayer(MediaCore):
         super(AthanPreviewPlayer, self).__init__()
 
     def play(self):
-        """ Override """
+        """Override"""
         return super(AthanPreviewPlayer, self).play()
 
     def stop(self):
-        """ Override """
+        """Override"""
         return super(AthanPreviewPlayer, self).stop()
 
     def media_status_changed(self, status):
@@ -364,5 +413,5 @@ class AthanPreviewPlayer(MediaCore):
         :param status: new status of the current player.
         :return:
         """
-        if status == QMediaPlayer.EndOfMedia:
+        if status == QMediaPlayer.MediaStatus.EndOfMedia:
             pass

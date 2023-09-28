@@ -16,9 +16,9 @@
 # more details.                                                               #
 # --------------------------------------------------------------------------- #
 
-from PyQt5 import QtWidgets
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPixmap
+from PyQt6 import QtWidgets
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QPixmap
 
 from prayertimes.core.common import translate
 from prayertimes.core.common.registrymixin import UniqueRegistryMixin, Registry
@@ -41,14 +41,16 @@ class LineEdit(QtWidgets.QLineEdit, PMXMessageOverlay):
         self.setObjectName(self.__class__.__name__)
 
         self.setReadOnly(True)
-        self.setContextMenuPolicy(Qt.NoContextMenu)
+        self.setContextMenuPolicy(Qt.ContextMenuPolicy.NoContextMenu)
 
-        self._city = ''
-        self._country = ''
-        self._icon = QtWidgets.QLabel('')
+        self._city = ""
+        self._country = ""
+        self._icon = QtWidgets.QLabel("")
 
         self._layout = QtWidgets.QHBoxLayout()
-        self._layout.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        self._layout.setAlignment(
+            Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
+        )
         self._layout.addWidget(self._icon)
         self.setLayout(self._layout)
 
@@ -107,61 +109,89 @@ class MainFrame(UniqueRegistryMixin, RegistryProperties, QtWidgets.QFrame):
         self.settings_layout = QtWidgets.QHBoxLayout()
         self.buttons_layout = QtWidgets.QHBoxLayout()
 
-        self.asr_settings_list = ComboBox(list_items=[translate('Application', "Standard"),
-                                                      translate('Application', "Hanafi")], parent=self)
-        self.calc_method_list = ComboBox(list_items=self.prayer_manager.method_list, parent=self)
+        self.asr_settings_list = ComboBox(
+            list_items=[
+                translate("Application", "Standard"),
+                translate("Application", "Hanafi"),
+            ],
+            parent=self,
+        )
+        self.calc_method_list = ComboBox(
+            list_items=self.prayer_manager.method_list, parent=self
+        )
 
         # Set default calculation method to ISNA
-        index = self.calc_method_list.findText("ISNA", Qt.MatchFixedString)
+        index = self.calc_method_list.findText("ISNA", Qt.MatchFlag.MatchFixedString)
         self.calc_method_list.setCurrentIndex(index)
 
-        self.top_label = QtWidgets.QLabel('Q', self)
+        self.top_label = QtWidgets.QLabel("Q", self)
         self.top_label.setObjectName("QTopLabel_welcome")
-        self.top_label.setAlignment(Qt.AlignCenter | Qt.AlignVCenter)
-        self.top_label.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        self.top_label.setAlignment(
+            Qt.AlignmentFlag.AlignCenter | Qt.AlignmentFlag.AlignVCenter
+        )
+        self.top_label.setSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Fixed
+        )
 
         self.line_edit = LineEdit(parent=self)
         self.line_edit.setFixedWidth(400)
 
-        self.dua_after_athan_cb = QtWidgets.QCheckBox(translate('Application', "Run dua after athan"), self)
+        self.dua_after_athan_cb = QtWidgets.QCheckBox(
+            translate("Application", "Run dua after athan"), self
+        )
         self.dua_after_athan_cb.stateChanged.connect(self._set_dua_after_athan)
 
-        self.volume_tb = RoundedToolButton(obj_name='Volume', parent=self)
+        self.volume_tb = RoundedToolButton(obj_name="Volume", parent=self)
         self.volume_tb.clicked.connect(self._control_volume)
         self.control_vol = ControlVolume(self)
         self.control_vol.hide()
 
-        self.opacity_tb = RoundedToolButton(obj_name='Opacity', parent=self)
+        self.opacity_tb = RoundedToolButton(obj_name="Opacity", parent=self)
         self.opacity_tb.clicked.connect(self._control_opacity)
         self.control_op = ControlOpacity(self)
         self.control_op.hide()
 
-        self.dua_tb = RoundedToolButton(obj_name='Dua', parent=self)
+        self.dua_tb = RoundedToolButton(obj_name="Dua", parent=self)
         self.dua_tb.clicked.connect(self._control_dua)
         self.control_dua = ControlDua(self)
         self.control_dua.hide()
 
-        self.timeformat_tb = RoundedToolButton(obj_name='TimeFormat', parent=self)
+        self.timeformat_tb = RoundedToolButton(obj_name="TimeFormat", parent=self)
         self.timeformat_tb.clicked.connect(self.udpate_date_format)
         self.timeformat_tb.setFixedSize(50, 50)
 
-        self.style_tb = RoundedToolButton(obj_name='Style', parent=self)
+        self.style_tb = RoundedToolButton(obj_name="Style", parent=self)
         self.style_tb.clicked.connect(self.change_style)
         self.style_tb.setEnabled(False)
 
-        self.athan_list = ComboBox(list_items=["Athan 1", "Athan 2", "Athan 3", "Athan 4",
-                                               "Athan 5", "Athan 6", "Athan 7"], parent=self)
+        self.athan_list = ComboBox(
+            list_items=[
+                "Athan 1",
+                "Athan 2",
+                "Athan 3",
+                "Athan 4",
+                "Athan 5",
+                "Athan 6",
+                "Athan 7",
+            ],
+            parent=self,
+        )
         self.athan_list.setFixedWidth(120)
 
         # TODO - Change button text when appropriate.
-        self.preview_athan_button = QtWidgets.QPushButton("Preview")
-        self.preview_athan_button.clicked[bool].connect(self._preview_athan)
+        self.preview_athan_button = QtWidgets.QPushButton(
+            "Preview", clicked=self._preview_athan
+        )
         self.preview_athan_button.setFixedWidth(80)
 
-        self.athan_list.currentIndexChanged[int].connect(self.change_athan)
+        self.athan_list.currentIndexChanged.connect(self.change_athan)
 
-        self.calc_method_list.currentIndexChanged.connect(self.update_calculation_method)
-        self.asr_settings_list.currentIndexChanged.connect(self.update_asr_settings_method)
+        self.calc_method_list.currentIndexChanged.connect(
+            self.update_calculation_method
+        )
+        self.asr_settings_list.currentIndexChanged.connect(
+            self.update_asr_settings_method
+        )
 
         self.setup_ui()
 
@@ -197,8 +227,12 @@ class MainFrame(UniqueRegistryMixin, RegistryProperties, QtWidgets.QFrame):
         self.setLayout(self.layout)
 
     def __application_init__(self):
-        Registry().register_function("update_display_information", self.update_display_information)
-        Registry().register_function("update_city_information", self.update_city_information)
+        Registry().register_function(
+            "update_display_information", self.update_display_information
+        )
+        Registry().register_function(
+            "update_city_information", self.update_city_information
+        )
 
     def __application_post_init__(self):
         pass
@@ -244,7 +278,9 @@ class MainFrame(UniqueRegistryMixin, RegistryProperties, QtWidgets.QFrame):
         else:
             Settings().setValue("prayer_settings/dua_after_athan", 0)
 
-    def update_display_information(self, calc, asr_method, dua_after_athan, city_object):
+    def update_display_information(
+        self, calc, asr_method, dua_after_athan, city_object
+    ):
         """
         Update the display information concerning the city, the calculation method, the
         asr setting method and dua after athan action.
@@ -255,10 +291,12 @@ class MainFrame(UniqueRegistryMixin, RegistryProperties, QtWidgets.QFrame):
         :param city_object:
         :return:
         """
-        index = self.calc_method_list.findText(calc, Qt.MatchFixedString)
+        index = self.calc_method_list.findText(calc, Qt.MatchFlag.MatchFixedString)
         self.calc_method_list.setCurrentIndex(index)
 
-        index = self.asr_settings_list.findText(asr_method, Qt.MatchFixedString)
+        index = self.asr_settings_list.findText(
+            asr_method, Qt.MatchFlag.MatchFixedString
+        )
         self.asr_settings_list.setCurrentIndex(index)
 
         self.dua_after_athan_cb.setChecked(bool(dua_after_athan))
@@ -287,7 +325,7 @@ class MainFrame(UniqueRegistryMixin, RegistryProperties, QtWidgets.QFrame):
             if self.control_dua.isVisible():
                 self.control_dua.hide()
             self.control_vol.show()
-            self.control_vol.setFocus(True)
+            self.control_vol.setFocus(Qt.FocusReason.MouseFocusReason)
         else:
             self.control_vol.hide()
 
@@ -303,7 +341,7 @@ class MainFrame(UniqueRegistryMixin, RegistryProperties, QtWidgets.QFrame):
             if self.control_dua.isVisible():
                 self.control_dua.hide()
             self.control_op.show()
-            self.control_op.setFocus(True)
+            self.control_op.setFocus(Qt.FocusReason.MouseFocusReason)
         else:
             self.control_op.hide()
 
@@ -315,7 +353,7 @@ class MainFrame(UniqueRegistryMixin, RegistryProperties, QtWidgets.QFrame):
         """
         if self.control_dua.isHidden():
             self.control_dua.show()
-            self.control_dua.setFocus(True)
+            self.control_dua.setFocus(Qt.FocusReason.MouseFocusReason)
         else:
             self.control_dua.hide()
 
@@ -346,8 +384,12 @@ class MainFrame(UniqueRegistryMixin, RegistryProperties, QtWidgets.QFrame):
 
         :return:
         """
-        Settings().setValue("prayer_settings/calculation", self.calc_method_list.currentText())
-        Registry().execute("update_calculation_method", self.calc_method_list.currentText())
+        Settings().setValue(
+            "prayer_settings/calculation", self.calc_method_list.currentText()
+        )
+        Registry().execute(
+            "update_calculation_method", self.calc_method_list.currentText()
+        )
 
     def update_asr_settings_method(self):
         """
@@ -357,7 +399,9 @@ class MainFrame(UniqueRegistryMixin, RegistryProperties, QtWidgets.QFrame):
 
         :return:
         """
-        Settings().setValue("prayer_settings/asr_method", self.asr_settings_list.currentText())
+        Settings().setValue(
+            "prayer_settings/asr_method", self.asr_settings_list.currentText()
+        )
         Registry().execute("update_asr_settings", self.asr_settings_list.currentText())
 
     def change_athan(self, idx):

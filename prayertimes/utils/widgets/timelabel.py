@@ -16,8 +16,8 @@
 # more details.                                                               #
 # --------------------------------------------------------------------------- #
 
-from PyQt5 import QtWidgets
-from PyQt5.QtCore import QTime, QTimer
+from PyQt6 import QtWidgets
+from PyQt6.QtCore import QTime, QTimer
 
 
 class TimeLabel(QtWidgets.QLabel):

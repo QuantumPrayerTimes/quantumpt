@@ -18,9 +18,9 @@
 
 # import os
 #
-# from PyQt5 import QtWidgets
-# from PyQt5.QtGui import QIcon
-# from PyQt5.QtCore import Qt
+# from PyQt6 import QtWidgets
+# from PyQt6.QtGui import QIcon
+# from PyQt6.QtCore import Qt
 
 from prayertimes.ui.abstract import Dialog
 
@@ -31,6 +31,11 @@ class InfoDialog(Dialog):
     """
 
     def __init__(self, parent=None):
-        super(InfoDialog, self).__init__(width=650, height=290, obj_name="AboutDialog",
-                                         titlebar_name="Info", titlebar_icon=None, parent=parent)
-
+        super(InfoDialog, self).__init__(
+            width=650,
+            height=290,
+            obj_name="AboutDialog",
+            titlebar_name="Info",
+            titlebar_icon=None,
+            parent=parent,
+        )

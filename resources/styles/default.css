@@ -503,28 +503,6 @@ QToolButton#StyleTB:hover {
 }
 
 /* MainFrame ============================================================= */
-
-#MainFrame #PreviewLabel {
-    font: 13px "Century Gothic";
-    color: #657786;
-    border: 1px solid #232f3b;
-    background-color: #1A242B;
-    outline: none;
-    border-radius: 0;
-    /*qproperty-alignment: 'AlignVCenter | AlignCenter';*/
-    max-height: 26px;
-}
-
-#MainFrame #PreviewLabel:hover {
-    font: 13px "Century Gothic";
-    color: #abc3d3;
-    border: 1px solid #232f3b;
-    background-color: #1c272f;
-    outline: none;
-    border-radius: 0;
-    /*qproperty-alignment: 'AlignVCenter | AlignCenter';*/
-}
-
 #CriticalExceptionDialog {
     outline: 0;
     background-color: #161F26;
@@ -628,19 +606,23 @@ QPushButton {
     color: silver;
     background-color: #1D282F;
     border: 1px solid #37495b;
-    padding: 5px;
+    padding-left: 5px;
+    padding-right: 5px;
     border-radius: 0;
     outline: none;
-    min-height: 16px;
+    min-height: 25px;
+    max-height: 30px;
 }
 
 QPushButton:disabled {
     background-color: #14232b;
     border: 1px solid #233547;
-    padding: 5px;
-    min-height: 16px;
+    padding-left: 5px;
+    padding-right: 5px;
     /*border-radius: 2px;*/
     /*color: #454545;*/
+    min-height: 25px;
+    max-height: 30px;
 }
 
 QPushButton:pressed {
@@ -778,7 +760,8 @@ QComboBox {
     /*padding: 3px;*/
     color: #bbbbbb;
     font: 13px "Ubuntu";
-    min-height: 26px;
+    min-height: 25px;
+    max-height: 30px;
 }
 
 QComboBox:hover{

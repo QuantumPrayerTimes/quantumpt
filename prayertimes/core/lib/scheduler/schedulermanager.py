@@ -36,15 +36,15 @@ class SchedulerManager(UniqueRegistryMixin, RegistryProperties):
     """
 
     # Shourouq is not included because it is not an athan
-    __prayers_list__ = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha']
+    __prayers_list__ = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"]
 
     def __init__(self):
         super(SchedulerManager, self).__init__(None)
 
         self.scheduler = BackgroundScheduler()
-        self.scheduler.add_jobstore(MemoryJobStore(), alias='athans')
-        self.scheduler.add_jobstore(MemoryJobStore(), alias='dua')
-        self.scheduler.add_jobstore(MemoryJobStore(), alias='calculation')
+        self.scheduler.add_jobstore(MemoryJobStore(), alias="athans")
+        self.scheduler.add_jobstore(MemoryJobStore(), alias="dua")
+        self.scheduler.add_jobstore(MemoryJobStore(), alias="calculation")
 
     def __application_init__(self):
         Registry().register_function("shutdown_scheduler", self.shutdown)
@@ -63,13 +63,17 @@ class SchedulerManager(UniqueRegistryMixin, RegistryProperties):
         """
 
         for prayer, time in prayertimes_dict.items():
-            if prayer == 'Shourouq':
+            if prayer == "Shourouq":
                 continue
             if not self.scheduler.get_job(prayer):
-                log.debug("Adding job ID : {} in scheduler at time {}".format(prayer, time))
+                log.debug(
+                    "Adding job ID : {} in scheduler at time {}".format(prayer, time)
+                )
                 kwargs = dict(prayer=prayer)
                 trigger = CronTrigger(hour=time.hour, minute=time.minute)
-                self.scheduler.add_job(func, kwargs=kwargs, jobstore='athans', trigger=trigger, id=prayer)
+                self.scheduler.add_job(
+                    func, kwargs=kwargs, jobstore="athans", trigger=trigger, id=prayer
+                )
 
         if not self.scheduler.running:
             self.scheduler.start()
@@ -82,7 +86,7 @@ class SchedulerManager(UniqueRegistryMixin, RegistryProperties):
         :param time: a datetime.time object corresponding to new scheduled time for prayer.
         :return:
         """
-        if prayer == 'Shourouq':
+        if prayer == "Shourouq":
             return
         try:
             h = int(time.hour)
@@ -90,9 +94,13 @@ class SchedulerManager(UniqueRegistryMixin, RegistryProperties):
             trigger = CronTrigger(hour=h, minute=m)
             # Keep state of the scheduler after rescheduling a job
             if self.scheduler.get_job(prayer).next_run_time:
-                self.scheduler.reschedule_job(job_id=prayer, trigger=trigger, jobstore='athans')
+                self.scheduler.reschedule_job(
+                    job_id=prayer, trigger=trigger, jobstore="athans"
+                )
             else:
-                self.scheduler.reschedule_job(job_id=prayer, trigger=trigger, jobstore='athans')
+                self.scheduler.reschedule_job(
+                    job_id=prayer, trigger=trigger, jobstore="athans"
+                )
                 self.scheduler.pause_job(prayer)
         except AttributeError:
             log.error("Could not rescheduler athan alarm for {}".format(prayer))
@@ -122,7 +130,7 @@ class SchedulerManager(UniqueRegistryMixin, RegistryProperties):
 
         if not self.scheduler.get_job("Dua"):
             trigger = IntervalTrigger(minutes=minutes)
-            self.scheduler.add_job(func, trigger=trigger, id="Dua", jobstore='dua')
+            self.scheduler.add_job(func, trigger=trigger, id="Dua", jobstore="dua")
 
         if not self.scheduler.running:
             self.scheduler.start()
@@ -136,7 +144,7 @@ class SchedulerManager(UniqueRegistryMixin, RegistryProperties):
         """
         try:
             trigger = IntervalTrigger(minutes=minutes)
-            self.scheduler.reschedule_job(job_id="Dua", trigger=trigger, jobstore='dua')
+            self.scheduler.reschedule_job(job_id="Dua", trigger=trigger, jobstore="dua")
         except AttributeError:
             log.error("Could not rescheduler dua")
 
@@ -149,7 +157,7 @@ class SchedulerManager(UniqueRegistryMixin, RegistryProperties):
 
         :return:
         """
-        self.scheduler.remove_job(job_id="Dua", jobstore='dua')
+        self.scheduler.remove_job(job_id="Dua", jobstore="dua")
 
     def run_calc_sched(self, func):
         """
@@ -161,8 +169,10 @@ class SchedulerManager(UniqueRegistryMixin, RegistryProperties):
 
         if not self.scheduler.get_job("Calculation"):
             log.debug("Adding job ID : {} in scheduler".format("Calculation"))
-            trigger = CronTrigger(hour='00', minute='00', second='01')
-            self.scheduler.add_job(func, trigger=trigger, id="Calculation", jobstore='calculation')
+            trigger = CronTrigger(hour="00", minute="00", second="01")
+            self.scheduler.add_job(
+                func, trigger=trigger, id="Calculation", jobstore="calculation"
+            )
 
         if not self.scheduler.running:
             self.scheduler.start()

@@ -18,10 +18,10 @@
 
 import os
 
-from PyQt5 import QtWidgets
-from PyQt5.QtCore import Qt, QStringListModel
-from PyQt5.QtGui import QIcon, QColor, QStandardItem, QStandardItemModel, QFont
-from PyQt5.QtSql import QSqlDatabase, QSqlQuery
+from PyQt6 import QtWidgets
+from PyQt6.QtCore import Qt, QStringListModel
+from PyQt6.QtGui import QIcon, QColor, QStandardItem, QStandardItemModel, QFont
+from PyQt6.QtSql import QSqlDatabase, QSqlQuery
 
 from prayertimes.core.common import translate
 from prayertimes.core.common.logapi import log
@@ -31,19 +31,24 @@ from prayertimes.core.common.registrymixin import RegistryMixin
 from prayertimes.core.common.resourceslocation import ResourcesLocation
 from prayertimes.core.common.settings import Settings
 
-from prayertimes.ui.abstract import Dialog, ListView, SideLabel, ListWidgetSelectorFrame, FrameCitySetting
+from prayertimes.ui.abstract import (
+    Dialog,
+    ListView,
+    SideLabel,
+    ListWidgetSelectorFrame,
+    FrameCitySetting,
+)
 
 from prayertimes.utils.city_infos import City, get_utc_offset
 
 
 class SettingsFrameSelector(QtWidgets.QFrame):
-
     def __init__(self, parent=None):
         super(SettingsFrameSelector, self).__init__(parent)
 
         self.setFixedWidth(135)
 
-        self.setWindowFlags(Qt.FramelessWindowHint)
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
         self.setObjectName(self.__class__.__name__)
 
         self.layout = QtWidgets.QVBoxLayout(self)
@@ -53,10 +58,24 @@ class SettingsFrameSelector(QtWidgets.QFrame):
         # self.side_label = QtWidgets.QLabel('Settings - الاعدادات')
         # self.side_label.setObjectName("TopSideLabel")
 
-        self.sl_1 = SideLabel(parent=self, label=translate('Application', "General"), icon=None, w_colorframe=3,
-                              h_colorframe=45, alignment='left', color=QColor(255, 165, 0))
-        self.sl_2 = SideLabel(parent=self, label=translate('Application', "Location"), icon=None, w_colorframe=3,
-                              h_colorframe=45, alignment='left', color=QColor(255, 165, 0))
+        self.sl_1 = SideLabel(
+            parent=self,
+            label=translate("Application", "General"),
+            icon=None,
+            w_colorframe=3,
+            h_colorframe=45,
+            alignment="left",
+            color=QColor(255, 165, 0),
+        )
+        self.sl_2 = SideLabel(
+            parent=self,
+            label=translate("Application", "Location"),
+            icon=None,
+            w_colorframe=3,
+            h_colorframe=45,
+            alignment="left",
+            color=QColor(255, 165, 0),
+        )
 
         self.listwidget_frame = ListWidgetSelectorFrame(self)
 
@@ -69,8 +88,11 @@ class SettingsFrameSelector(QtWidgets.QFrame):
         self.listwidget_frame.setItemWidget(_item, self.sl_2)
 
         # Resize ListWidget to fit content
-        self.listwidget_frame.setFixedSize(self.width(), self.listwidget_frame.sizeHintForRow(0) *
-                                           self.listwidget_frame.count() + 2 * self.listwidget_frame.frameWidth())
+        self.listwidget_frame.setFixedSize(
+            self.width(),
+            self.listwidget_frame.sizeHintForRow(0) * self.listwidget_frame.count()
+            + 2 * self.listwidget_frame.frameWidth(),
+        )
 
         # self.layout.addWidget(self.side_label)
         self.layout.addWidget(self.listwidget_frame)
@@ -104,7 +126,7 @@ class SettingsFrameSelector(QtWidgets.QFrame):
         # self.about_dialog_tb.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-        self.listwidget_frame.currentRowChanged[int].connect(self._modify_style_item)
+        self.listwidget_frame.currentRowChanged.connect(self._modify_style_item)
 
     def _modify_style_item(self, idx):
         """
@@ -126,7 +148,6 @@ class SettingsFrameSelector(QtWidgets.QFrame):
 
 
 class MainSettingsFrame(RegistryMixin, QtWidgets.QFrame):
-
     def __init__(self, parent=None):
         super(MainSettingsFrame, self).__init__(parent)
 
@@ -190,12 +211,14 @@ class MainSettingsFrame(RegistryMixin, QtWidgets.QFrame):
         while query.next():
             record = query.record()
             item = QStandardItem()
-            item.setIcon(QIcon(":/icons/countries/{}.png".format(record.value('cc'))))
-            item.setText(record.value('country'))
+            item.setIcon(QIcon(":/icons/countries/{}.png".format(record.value("cc"))))
+            item.setText(record.value("country"))
             self.country_model.appendRow(item)
 
         self.listview_countries.setModel(self.country_model)
-        self.listview_countries.selectionModel().currentChanged.connect(self.modified_country)
+        self.listview_countries.selectionModel().currentChanged.connect(
+            self.modified_country
+        )
 
     def _init_database(self):
         """
@@ -203,12 +226,12 @@ class MainSettingsFrame(RegistryMixin, QtWidgets.QFrame):
 
         :return:
         """
-        self.db = QSqlDatabase('QSQLITE')
-        self.db.setDatabaseName(ResourcesLocation().database_dir + '/database.db')
+        self.db = QSqlDatabase("QSQLITE")
+        self.db.setDatabaseName(ResourcesLocation().database_dir + "/database.db")
         if self.db.open():
             self._generate_countries()
         else:
-            log.error('Cannot open database')
+            log.error("Cannot open database")
 
     @staticmethod
     def check_country_city(country, city):
@@ -275,14 +298,18 @@ class MainSettingsFrame(RegistryMixin, QtWidgets.QFrame):
         self.city_model = QStringListModel([])
 
         query = QSqlQuery(self.db)
-        query.exec("SELECT id, state, district, city FROM DATABASE WHERE country=\'{}\'".format(country))
+        query.exec(
+            "SELECT id, state, district, city FROM DATABASE WHERE country='{}'".format(
+                country
+            )
+        )
 
         while query.next():
             record = query.record()
-            _city = record.value('city')
-            _state = record.value('state')
-            _district = record.value('district')
-            _id = record.value('id')
+            _city = record.value("city")
+            _state = record.value("state")
+            _district = record.value("district")
+            _id = record.value("id")
 
             if _state or _district:
                 if not _district:
@@ -290,15 +317,16 @@ class MainSettingsFrame(RegistryMixin, QtWidgets.QFrame):
                 elif not _state:
                     text = "{city} [{state}]".format(city=_city, state=_district)
                 else:
-                    text = "{city} [{state}] [{district}]" \
-                        .format(city=_city, state=_state, district=_district)
+                    text = "{city} [{state}] [{district}]".format(
+                        city=_city, state=_state, district=_district
+                    )
             else:
                 text = "{city}".format(city=_city)
 
             self.list_cities[text] = _id
 
         self.city_model.setStringList(self.list_cities.keys())
-        self.city_model.sort(0, Qt.AscendingOrder)
+        self.city_model.sort(0, Qt.SortOrder.AscendingOrder)
 
         self.listview_cities.setModel(self.city_model)
         self.listview_cities.selectionModel().currentChanged.connect(self.modified_city)
@@ -329,22 +357,26 @@ class MainSettingsFrame(RegistryMixin, QtWidgets.QFrame):
         :return:
         """
         query = QSqlQuery(self.db)
-        query.exec("SELECT * FROM DATABASE WHERE id=\'{}\'".format(city_id))
+        query.exec("SELECT * FROM DATABASE WHERE id='{}'".format(city_id))
 
         while query.next():
             record = query.record()
 
             # Get dictionnary information from database of the selected city
             # and update our dictionnary with the correct values
-            self.city_object = City(dict(continent=record.value('continent'),
-                                         country=record.value('country'),
-                                         cc=record.value('cc'),
-                                         state=record.value('state'),
-                                         city=record.value('city'),
-                                         lat=record.value('lat'),
-                                         lng=record.value('lng'),
-                                         tz=record.value('tz'),
-                                         utc=get_utc_offset(record.value('tz'))))
+            self.city_object = City(
+                dict(
+                    continent=record.value("continent"),
+                    country=record.value("country"),
+                    cc=record.value("cc"),
+                    state=record.value("state"),
+                    city=record.value("city"),
+                    lat=record.value("lat"),
+                    lng=record.value("lng"),
+                    tz=record.value("tz"),
+                    utc=get_utc_offset(record.value("tz")),
+                )
+            )
 
         # Update the display on frame
         self.frame_city.update_labels(self.city_object)
@@ -357,7 +389,11 @@ class MainSettingsFrame(RegistryMixin, QtWidgets.QFrame):
         """
         if self.city_object:
             Settings().save_city_config(self.city_object.city_info)
-            log.debug("saved city configuration from settings with : {}".format(self.city_object.city_info))
+            log.debug(
+                "saved city configuration from settings with : {}".format(
+                    self.city_object.city_info
+                )
+            )
             Registry().execute("load_city_configuration")
         else:
             return
@@ -373,7 +409,6 @@ class MainSettingsFrame(RegistryMixin, QtWidgets.QFrame):
 
 
 class GeneralSettingsFrame(RegistryProperties, QtWidgets.QFrame):
-
     def __init__(self, parent=None):
         super(GeneralSettingsFrame, self).__init__(parent)
 
@@ -381,10 +416,16 @@ class GeneralSettingsFrame(RegistryProperties, QtWidgets.QFrame):
 
         self.layout = QtWidgets.QVBoxLayout(self)
 
-        self.close_prog_cb = QtWidgets.QCheckBox(translate('Application',
-                                                           "Minimize to system tray when program is closed"), self)
-        self.splashscreen_cb = QtWidgets.QCheckBox(translate('Application', "Show splashscreen"), self)
-        self.arabic_names_cb = QtWidgets.QCheckBox(translate('Application', "Show arabic prayer names"), self)
+        self.close_prog_cb = QtWidgets.QCheckBox(
+            translate("Application", "Minimize to system tray when program is closed"),
+            self,
+        )
+        self.splashscreen_cb = QtWidgets.QCheckBox(
+            translate("Application", "Show splashscreen"), self
+        )
+        self.arabic_names_cb = QtWidgets.QCheckBox(
+            translate("Application", "Show arabic prayer names"), self
+        )
 
         self.layout.addWidget(self._groupbox_close_setting())
         self.layout.addStretch()
@@ -440,8 +481,12 @@ class GeneralSettingsFrame(RegistryProperties, QtWidgets.QFrame):
             elif Settings().value("general_settings/splashscreen") == 1:
                 self.splashscreen_cb.setChecked(True)
             else:
-                log.debug("value for splashscreen in "
-                          "settings.ini: {}".format(Settings().value("general_settings/splashscreen")))
+                log.debug(
+                    "value for splashscreen in "
+                    "settings.ini: {}".format(
+                        Settings().value("general_settings/splashscreen")
+                    )
+                )
         else:
             self.splashscreen_cb.setChecked(True)
             Settings().setValue("general_settings/splashscreen", 1)
@@ -452,8 +497,12 @@ class GeneralSettingsFrame(RegistryProperties, QtWidgets.QFrame):
             elif Settings().value("general_settings/arabic_names") == 1:
                 self.arabic_names_cb.setChecked(True)
             else:
-                log.debug("value for arabic_names in "
-                          "settings.ini: {}".format(Settings().value("general_settings/arabic_names")))
+                log.debug(
+                    "value for arabic_names in "
+                    "settings.ini: {}".format(
+                        Settings().value("general_settings/arabic_names")
+                    )
+                )
         else:
             self.arabic_names_cb.setChecked(True)
             Settings().setValue("general_settings/arabic_names", 1)
@@ -464,7 +513,11 @@ class GeneralSettingsFrame(RegistryProperties, QtWidgets.QFrame):
             elif Settings().value("general_settings/close") == 1:
                 self.close_prog_cb.setChecked(False)
             else:
-                log.debug("value for close in settings.ini: {}".format(Settings().value("general_settings/close")))
+                log.debug(
+                    "value for close in settings.ini: {}".format(
+                        Settings().value("general_settings/close")
+                    )
+                )
         else:
             self.close_prog_cb.setChecked(True)
             Settings().setValue("general_settings/close", 0)
@@ -475,15 +528,23 @@ class SettingsDialog(Dialog):
     Settings dialog.
     """
 
-    APPLY = QtWidgets.QDialogButtonBox.Apply
-    CANCEL = QtWidgets.QDialogButtonBox.Cancel
-    OK = QtWidgets.QDialogButtonBox.Ok
+    APPLY = QtWidgets.QDialogButtonBox.StandardButton.Apply
+    CANCEL = QtWidgets.QDialogButtonBox.StandardButton.Cancel
+    OK = QtWidgets.QDialogButtonBox.StandardButton.Ok
 
     def __init__(self, parent=None):
-        super(SettingsDialog, self).__init__(width=780, height=480, obj_name=self.__class__.__name__,
-                                             titlebar_name="Settings", titlebar_icon=None, parent=parent)
+        super(SettingsDialog, self).__init__(
+            width=780,
+            height=480,
+            obj_name=self.__class__.__name__,
+            titlebar_name="Settings",
+            titlebar_icon=None,
+            parent=parent,
+        )
 
-        self.dialog_buttons = QtWidgets.QDialogButtonBox(self.CANCEL | self.OK | self.APPLY, Qt.Horizontal, self)
+        self.dialog_buttons = QtWidgets.QDialogButtonBox(
+            self.CANCEL | self.OK | self.APPLY, Qt.Orientation.Horizontal, self
+        )
 
         self.apply_button = self.dialog_buttons.button(self.APPLY)
         self.cancel_button = self.dialog_buttons.button(self.CANCEL)
@@ -503,8 +564,10 @@ class SettingsDialog(Dialog):
         self.status_layout = QtWidgets.QHBoxLayout()
         self.status_layout.setContentsMargins(9, 9, 9, 9)
 
-        contact_label = QtWidgets.QLabel(translate('Application', "For any problem, please contact us."), self)
-        font = QFont('ubuntu', 10)
+        contact_label = QtWidgets.QLabel(
+            translate("Application", "For any problem, please contact us."), self
+        )
+        font = QFont("ubuntu", 10)
         contact_label.setFont(font)
 
         self.status_layout.addWidget(contact_label)

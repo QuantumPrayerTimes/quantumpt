@@ -16,9 +16,9 @@
 # more details.                                                               #
 # --------------------------------------------------------------------------- #
 
-from PyQt5 import QtWidgets
-from PyQt5.QtCore import Qt, QEvent, pyqtSignal, QThread
-from PyQt5.QtGui import QPixmap, QColor, QFont
+from PyQt6 import QtWidgets
+from PyQt6.QtCore import Qt, QEvent, pyqtSignal, QThread
+from PyQt6.QtGui import QPixmap, QColor, QFont
 
 from prayertimes.core.common import translate
 from prayertimes.core.common.logapi import log
@@ -32,7 +32,7 @@ from prayertimes.utils.date_timezone import lat_lng_to_dms
 from prayertimes.utils.widgets.widgetanimation import OpacityAnimation
 
 
-class AbstractFrame(QtWidgets.QFrame):
+class AbstractFrame(UniqueRegistryMixin, QtWidgets.QFrame):
     """
     Abstract frame that will be inherited by all frames classes.
 
@@ -50,23 +50,23 @@ class AbstractFrame(QtWidgets.QFrame):
         self.offset = self.pos()
 
     def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton:
+        if event.button() == Qt.MouseButton.LeftButton:
             self.offset = event.pos()
             self.left_click = True
 
     def mouseMoveEvent(self, event):
         if self.left_click:
-            x = event.globalX()
-            y = event.globalY()
+            x = event.globalPosition().x()
+            y = event.globalPosition().y()
             x_w = self.offset.x()
             y_w = self.offset.y()
-            self.move(x - x_w, y - y_w)
+            self.move(int(x - x_w), int(y - y_w))
 
     def mouseReleaseEvent(self, event):
         self.left_click = False
 
 
-class AbstractDialog(QtWidgets.QDialog):
+class AbstractDialog(RegistryProperties, RegistryMixin, QtWidgets.QDialog):
     """
     Abstract dialog that will be inherited by all dialogs classes.
 
@@ -84,20 +84,20 @@ class AbstractDialog(QtWidgets.QDialog):
         self.offset = self.pos()
 
         # Make the dialog modal to ONLY its parent (can have athan notification still available)
-        self.setWindowModality(Qt.WindowModal)
+        self.setWindowModality(Qt.WindowModality.WindowModal)
 
     def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton:
+        if event.button() == Qt.MouseButton.LeftButton:
             self.offset = event.pos()
             self.left_click = True
 
     def mouseMoveEvent(self, event):
         if self.left_click:
-            x = event.globalX()
-            y = event.globalY()
+            x = event.globalPosition().x()
+            y = event.globalPosition().y()
             x_w = self.offset.x()
             y_w = self.offset.y()
-            self.move(x - x_w, y - y_w)
+            self.move(int(x - x_w), int(y - y_w))
 
     def mouseReleaseEvent(self, event):
         self.left_click = False
@@ -117,12 +117,15 @@ class AbstractDialog(QtWidgets.QDialog):
         Registry().execute("activate_overlay")
         Registry().execute("activate_global_blur")
         # Center the dialog regarding its parent
-        self.move(self.global_frame.frameGeometry().topLeft() +
-                  self.global_frame.rect().center() - self.rect().center())
+        self.move(
+            self.global_frame.frameGeometry().topLeft()
+            + self.global_frame.rect().center()
+            - self.rect().center()
+        )
         return super(AbstractDialog, self).showEvent(event)
 
 
-class AbstractGlobalFrame(UniqueRegistryMixin, AbstractFrame):
+class AbstractGlobalFrame(AbstractFrame):
     """
     Abstract Global Frame.
 
@@ -134,10 +137,12 @@ class AbstractGlobalFrame(UniqueRegistryMixin, AbstractFrame):
         super(AbstractGlobalFrame, self).__init__(parent)
 
         self.blur_effect = QtWidgets.QGraphicsBlurEffect(self)
-        self.blur_effect.setBlurHints(QtWidgets.QGraphicsBlurEffect.PerformanceHint)
+        self.blur_effect.setBlurHints(
+            QtWidgets.QGraphicsBlurEffect.BlurHint.PerformanceHint
+        )
 
-        self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint)
-        self.setWindowFlags(self.windowFlags() & ~Qt.WindowStaysOnTopHint)
+        self.setWindowFlags(self.windowFlags() | Qt.WindowType.FramelessWindowHint)
+        self.setWindowFlags(self.windowFlags() & ~Qt.WindowType.WindowStaysOnTopHint)
 
         self.setObjectName(obj_name)
         self.setFixedSize(width, height)
@@ -173,64 +178,26 @@ class AbstractGlobalFrame(UniqueRegistryMixin, AbstractFrame):
         self.blur_effect.setBlurRadius(0)
         self.setGraphicsEffect(self.blur_effect)
 
-    def mousePressEvent(self, event):
-        """
-        Override method to control right click button. Used to resize windows (Not yet implmented).
 
-        :param event:
-        :return:
-        """
-        if event.button() == Qt.RightButton:
-            self.drag_x = event.x()
-            self.drag_y = event.y()
-            self.current_x = self.width()
-            self.current_y = self.height()
-            self.right_click = True
-
-        super(AbstractGlobalFrame, self).mousePressEvent(event)
-
-    def mouseMoveEvent(self, event):
-        """
-        Override method to control right click button. Used to resize windows (Not yet implmented).
-
-        :param event:
-        :return:
-        """
-        if self.right_click:
-            x = max(self.minimumWidth(),
-                    self.current_x + event.x() - self.drag_x)
-            y = max(self.minimumHeight(),
-                    self.current_y + event.y() - self.drag_y)
-            self.resize(x, y)
-
-        super(AbstractGlobalFrame, self).mouseMoveEvent(event)
-
-    def mouseReleaseEvent(self, event):
-        """
-        Override method to control right click button. Used to resize windows (Not yet implmented).
-
-        :param event:
-        :return:
-        """
-        self.right_click = False
-        super(AbstractGlobalFrame, self).mouseReleaseEvent(event)
-
-
-class Dialog(RegistryProperties, RegistryMixin, AbstractDialog):
+class Dialog(AbstractDialog):
     """
     Abstract Dialog.
 
     Base class for dialogs.
     """
 
-    def __init__(self, width, height, obj_name, titlebar_name, titlebar_icon, parent=None):
+    def __init__(
+        self, width, height, obj_name, titlebar_name, titlebar_icon, parent=None
+    ):
         super(Dialog, self).__init__(parent)
 
         self.blur_effect = QtWidgets.QGraphicsBlurEffect()
-        self.blur_effect.setBlurHints(QtWidgets.QGraphicsBlurEffect.PerformanceHint)
+        self.blur_effect.setBlurHints(
+            QtWidgets.QGraphicsBlurEffect.BlurHint.PerformanceHint
+        )
 
-        self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint)
-        self.setWindowFlags(self.windowFlags() & ~Qt.WindowStaysOnTopHint)
+        self.setWindowFlags(self.windowFlags() | Qt.WindowType.FramelessWindowHint)
+        self.setWindowFlags(self.windowFlags() & ~Qt.WindowType.WindowStaysOnTopHint)
 
         self.setFixedSize(width, height)
 
@@ -290,8 +257,8 @@ class AbstractTitleBar(QtWidgets.QFrame):
     def __init__(self, parent=None, title="Dafault", icon=None):
         super(AbstractTitleBar, self).__init__(parent)
 
-        self.setWindowFlags(Qt.FramelessWindowHint)
-        self.setObjectName('TitleBar')
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
+        self.setObjectName("TitleBar")
 
         self.setAutoFillBackground(True)
         self.setFixedHeight(35)
@@ -351,9 +318,9 @@ class GlobalTitlebar(AbstractTitleBar):
         :return:
         """
         if self.a:
-            Registry().execute('expand_main_frame_selector')
+            Registry().execute("expand_main_frame_selector")
         else:
-            Registry().execute('hide_main_frame_selector')
+            Registry().execute("hide_main_frame_selector")
         self.a = not self.a
 
     @staticmethod
@@ -378,25 +345,28 @@ class ControlOption(UniqueRegistryMixin, RegistryProperties, QtWidgets.QFrame):
 
     Used in VolumeControl, DuaControl and OpacityControl.
     """
+
     def __init__(self, obj_name, icon=None, parent=None):
         super(ControlOption, self).__init__(parent)
 
         self.setObjectName(obj_name)
-        self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint)
+        self.setWindowFlags(self.windowFlags() | Qt.WindowType.FramelessWindowHint)
 
         self.layout = QtWidgets.QHBoxLayout(self)
         # self.layout.setContentsMargins(0, 0, 0, 0)
         # self.layout.setSpacing(0)
 
         self.ctrl_icon = QtWidgets.QLabel()
-        self.ctrl_icon.setAlignment(Qt.AlignVCenter | Qt.AlignCenter)
+        self.ctrl_icon.setAlignment(
+            Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignCenter
+        )
         self.ctrl_icon.setPixmap(QPixmap(icon))
 
-        self.sld = QtWidgets.QSlider(Qt.Horizontal)
-        self.sld.setFocusPolicy(Qt.NoFocus)
+        self.sld = QtWidgets.QSlider(Qt.Orientation.Horizontal)
+        self.sld.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.sld.setRange(0, 100)
 
-        self.resize(310, 50)
+        self.resize(350, 50)
 
         self.layout.addWidget(self.ctrl_icon)
         self.layout.addWidget(self.sld)
@@ -411,14 +381,14 @@ class ControlOption(UniqueRegistryMixin, RegistryProperties, QtWidgets.QFrame):
         :param event: event to catch.
         :return:
         """
-        if event.type() == QEvent.WindowActivate:
+        if event.type() == QEvent.Type.WindowActivate:
             return True
-        elif event.type() == QEvent.WindowDeactivate:
+        elif event.type() == QEvent.Type.WindowDeactivate:
             self.hide()
             return True
-        elif event.type() == QEvent.FocusIn:
+        elif event.type() == QEvent.Type.FocusIn:
             return True
-        elif event.type() == QEvent.FocusOut:
+        elif event.type() == QEvent.Type.FocusOut:
             self.hide()
             return True
         else:
@@ -446,10 +416,12 @@ class ColorFrame(QtWidgets.QFrame):
         self.setStyleSheet(
             """
             background-color: rgba({r}, {g}, {b}, {a});
-            """.format(r=self.color.red(),
-                       g=self.color.green(),
-                       b=self.color.blue(),
-                       a=self.color.alpha())
+            """.format(
+                r=self.color.red(),
+                g=self.color.green(),
+                b=self.color.blue(),
+                a=self.color.alpha(),
+            )
         )
 
 
@@ -457,6 +429,7 @@ class ConstructionFrame(QtWidgets.QFrame):
     """
     Contruction frame used to display a simple message.
     """
+
     def __init__(self, text="", parent=None):
         super(ConstructionFrame, self).__init__(parent)
         self.layout = QtWidgets.QVBoxLayout(self)
@@ -471,7 +444,7 @@ class ConstructionFrame(QtWidgets.QFrame):
             """
         )
 
-        self.label.setAlignment(Qt.AlignCenter)
+        self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout.addWidget(self.label)
 
 
@@ -480,19 +453,22 @@ class ListView(QtWidgets.QListView):
     ListView used to display cities in different countries.
     Much faster and cleaner than QListWidget.
     """
+
     def __init__(self, parent=None):
         super(ListView, self).__init__(parent)
 
         self.setObjectName(self.__class__.__name__)
-        self.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        self.setSelectionMode(QtWidgets.QAbstractItemView.SelectionMode.SingleSelection)
         # Layout items in batches instead of waiting for all items to be
         # loaded before user is allowed to interact with them.
-        self.setLayoutMode(QtWidgets.QListView.Batched)
+        self.setLayoutMode(QtWidgets.QListView.LayoutMode.Batched)
         self.setUniformItemSizes(True)
         # Read only cells
-        self.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        self.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers)
         # Remove the blank area at the end of the ListView
-        self.setVerticalScrollMode(QtWidgets.QAbstractItemView.ScrollPerPixel)
+        self.setVerticalScrollMode(
+            QtWidgets.QAbstractItemView.ScrollMode.ScrollPerPixel
+        )
 
 
 class ListWidgetSelectorFrame(QtWidgets.QListWidget):
@@ -506,8 +482,8 @@ class ListWidgetSelectorFrame(QtWidgets.QListWidget):
         super(ListWidgetSelectorFrame, self).__init__(parent)
 
         self.setObjectName(self.__class__.__name__)
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setUniformItemSizes(True)
 
 
@@ -517,14 +493,23 @@ class SideLabel(QtWidgets.QFrame):
 
     It can display arabic or english message with given orientation.
     """
+
     selected = pyqtSignal()
     unselected = pyqtSignal()
 
-    def __init__(self, parent=None, label=None, icon=None,
-                 w_colorframe=0, h_colorframe=0, alignment='left', color=QColor(255, 165, 0)):
+    def __init__(
+        self,
+        parent=None,
+        label=None,
+        icon=None,
+        w_colorframe=0,
+        h_colorframe=0,
+        alignment="left",
+        color=QColor(255, 165, 0),
+    ):
         super(SideLabel, self).__init__(parent)
 
-        self.setWindowFlags(Qt.FramelessWindowHint)
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
         self.setObjectName(self.__class__.__name__)
         self.setMouseTracking(True)
 
@@ -534,20 +519,29 @@ class SideLabel(QtWidgets.QFrame):
 
         self.color = color
 
-        self.color_frame = ColorFrame(width=w_colorframe, height=h_colorframe,
-                                      color=self.color, parent=self)
+        self.color_frame = ColorFrame(
+            width=w_colorframe, height=h_colorframe, color=self.color, parent=self
+        )
 
         self.label_setting = QtWidgets.QLabel(label, self)
 
         # self.label_icon = QtWidgets.QLabel(self)
         # self.label_icon.setPixmap(QPixmap(icon))
 
-        if alignment == 'right':
-            self.horizontal_layout.setDirection(QtWidgets.QBoxLayout.RightToLeft)
-            self.label_setting.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
-        elif alignment == 'left':
-            self.horizontal_layout.setDirection(QtWidgets.QBoxLayout.LeftToRight)
-            self.label_setting.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        if alignment == "right":
+            self.horizontal_layout.setDirection(
+                QtWidgets.QBoxLayout.Direction.RightToLeft
+            )
+            self.label_setting.setAlignment(
+                Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
+            )
+        elif alignment == "left":
+            self.horizontal_layout.setDirection(
+                QtWidgets.QBoxLayout.Direction.LeftToRight
+            )
+            self.label_setting.setAlignment(
+                Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
+            )
 
         self.horizontal_layout.addWidget(self.color_frame)
         # self.horizontal_layout.addWidget(self.label_icon)
@@ -561,9 +555,9 @@ class SideLabel(QtWidgets.QFrame):
         self.label_setting.setStyleSheet(
             """
             color: rgb({r}, {g}, {b});
-            """.format(r=self.color.red(),
-                       g=self.color.green(),
-                       b=self.color.blue())
+            """.format(
+                r=self.color.red(), g=self.color.green(), b=self.color.blue()
+            )
         )
 
     def _unselected(self):
@@ -577,7 +571,6 @@ class SideLabel(QtWidgets.QFrame):
 
 
 class TaskThread(QThread):
-
     def __init__(self, _function, *args, **kwargs):
         super(TaskThread, self).__init__()
         self.return_value = None
@@ -592,33 +585,34 @@ class TaskThread(QThread):
         self.return_value = self.function(*self.args, **self.kwargs)
 
     def on_finished(self):
-        """ Override """
+        """Override"""
         pass
 
     def exit(self, return_code=0):
-        """ Override """
+        """Override"""
         return super(TaskThread, self).exit(returnCode=return_code)
 
     def stop(self, exit_code):
-        """ Override """
+        """Override"""
         self.exit(exit_code)
 
     def quit(self):
-        """ Override """
+        """Override"""
         return super(TaskThread, self).quit()
 
 
 class FrameCitySetting(QtWidgets.QFrame):
-
     def __init__(self, parent=None, with_map=False):
         super(FrameCitySetting, self).__init__(parent)
 
         self.setObjectName(self.__class__.__name__)
-        self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        self.setSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Fixed
+        )
 
         if with_map:
             self._map_image = QtWidgets.QLabel(self)
-            self._map_image.setPixmap(QPixmap(':/icons/framecity_map.png'))
+            self._map_image.setPixmap(QPixmap(":/icons/framecity_map.png"))
 
         self._continent = QtWidgets.QLabel(self)
         self._state = QtWidgets.QLabel(self)
@@ -628,13 +622,21 @@ class FrameCitySetting(QtWidgets.QFrame):
         self._coordinates_formatted = QtWidgets.QLabel(self)
         self._tz = QtWidgets.QLabel(self)
 
-        self.location_label = QtWidgets.QLabel(translate('Application', 'Location'), self)
-        self.location_label.setStyleSheet("QLabel {font: 30px 'capsuula'; color: #204550}")
+        self.location_label = QtWidgets.QLabel(
+            translate("Application", "Location"), self
+        )
+        self.location_label.setStyleSheet(
+            "QLabel {font: 30px 'capsuula'; color: #204550}"
+        )
 
-        self.cooridnates_label = QtWidgets.QLabel(translate('Application', 'Coordinates'), self)
-        self.cooridnates_label.setStyleSheet("QLabel {font: 30px 'capsuula'; color: #204550}")
+        self.cooridnates_label = QtWidgets.QLabel(
+            translate("Application", "Coordinates"), self
+        )
+        self.cooridnates_label.setStyleSheet(
+            "QLabel {font: 30px 'capsuula'; color: #204550}"
+        )
 
-        self.tz_label = QtWidgets.QLabel(translate('Application', 'Timezone'), self)
+        self.tz_label = QtWidgets.QLabel(translate("Application", "Timezone"), self)
         self.tz_label.setStyleSheet("QLabel {font: 30px 'capsuula'; color: #204550}")
 
         self.h_layout = QtWidgets.QHBoxLayout(self)
@@ -671,14 +673,21 @@ class FrameCitySetting(QtWidgets.QFrame):
         """
         assert isinstance(city_object, City)
 
-        self._continent.setText("{0} : {1:}".format('Continent', city_object.continent))
-        self._country.setText("{0} : {1:}".format('Country', city_object.country))
-        self._state.setText("{0} : {1:}".format('State', city_object.state))
-        self._city.setText("{0} : {1:}".format('City', city_object.city))
-        self._coordinates.setText('Coordinates : {} | {}'.format(city_object.lat, city_object.lng))
-        self._coordinates_formatted.setText('Coordinates : {}'.format(lat_lng_to_dms(float(city_object.lat),
-                                                                                     float(city_object.lng))))
-        self._tz.setText('Timezone - UTC : {} | {}'.format(city_object.tz, city_object.utc))
+        self._continent.setText("{0} : {1:}".format("Continent", city_object.continent))
+        self._country.setText("{0} : {1:}".format("Country", city_object.country))
+        self._state.setText("{0} : {1:}".format("State", city_object.state))
+        self._city.setText("{0} : {1:}".format("City", city_object.city))
+        self._coordinates.setText(
+            "Coordinates : {} | {}".format(city_object.lat, city_object.lng)
+        )
+        self._coordinates_formatted.setText(
+            "Coordinates : {}".format(
+                lat_lng_to_dms(float(city_object.lat), float(city_object.lng))
+            )
+        )
+        self._tz.setText(
+            "Timezone - UTC : {} | {}".format(city_object.tz, city_object.utc)
+        )
 
     def clear(self):
         """
@@ -701,7 +710,9 @@ class CheckableButton(QtWidgets.QPushButton):
         super(CheckableButton, self).__init__(parent)
 
         self.setObjectName(self.__class__.__name__)
-        self.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        self.setSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed
+        )
         self.setCheckable(True)
 
 
@@ -722,9 +733,11 @@ class NotificationFrame(RegistryProperties, OpacityAnimation, QtWidgets.QDialog)
     WARNING = 1
     ERROR = 2
 
-    map_type = {OK: ['Good', ':/icons/notification_ok.png'],
-                WARNING: ['Warning !', ':/icons/notification_warning.png'],
-                ERROR: ['Error !', ':/icons/notification_error.png']}
+    map_type = {
+        OK: ["Good", ":/icons/notification_ok.png"],
+        WARNING: ["Warning !", ":/icons/notification_warning.png"],
+        ERROR: ["Error !", ":/icons/notification_error.png"],
+    }
 
     def __init__(self, parent=None):
         super(NotificationFrame, self).__init__(parent)
@@ -735,12 +748,12 @@ class NotificationFrame(RegistryProperties, OpacityAnimation, QtWidgets.QDialog)
 
         self.setMaximumWidth(600)
 
-        self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint)
-        self.setWindowFlags(self.windowFlags() & ~Qt.WindowStaysOnTopHint)
+        self.setWindowFlags(self.windowFlags() | Qt.WindowType.FramelessWindowHint)
+        self.setWindowFlags(self.windowFlags() & ~Qt.WindowType.WindowStaysOnTopHint)
 
         # Make the dialog modal to ONLY its parent (to have athan notification still available)
         # Need to call the Notification frame with self : e.g NotificationFrame(self)
-        self.setWindowModality(Qt.WindowModal)
+        self.setWindowModality(Qt.WindowModality.WindowModal)
         self.setModal(True)
 
         self.setObjectName(self.__class__.__name__)
@@ -748,18 +761,17 @@ class NotificationFrame(RegistryProperties, OpacityAnimation, QtWidgets.QDialog)
         self.main_layout = QtWidgets.QGridLayout()
         self.main_layout.setSpacing(10)
 
-        self.message = QtWidgets.QLabel('', self)
+        self.message = QtWidgets.QLabel("", self)
         font = QFont("ubuntu", 10)
         self.message.setFont(font)
 
-        self.title = QtWidgets.QLabel('', self)
+        self.title = QtWidgets.QLabel("", self)
         font = QFont("capsuula", 20)
         self.title.setFont(font)
 
         self.icon = QtWidgets.QLabel(self)
 
-        self.close_button = QtWidgets.QPushButton('OK', self)
-        self.close_button.clicked.connect(self.fade_out)
+        self.close_button = QtWidgets.QPushButton("OK", clicked=self.fade_out)
 
         # self.main_layout.addWidget(self.close_bt, 0, 0)
         self.main_layout.addWidget(self.icon, 1, 0, 2, 2)
@@ -772,7 +784,7 @@ class NotificationFrame(RegistryProperties, OpacityAnimation, QtWidgets.QDialog)
 
         self.setLayout(self.main_layout)
 
-    def notify(self, msg_type, msg, title='', button_text="OK"):
+    def notify(self, msg_type, msg, title="", button_text="OK"):
         self.message.setText(msg)
         self.icon.setPixmap(QPixmap(self.map_type[msg_type][1]))
         if not title:
@@ -795,14 +807,17 @@ class NotificationFrame(RegistryProperties, OpacityAnimation, QtWidgets.QDialog)
         # Raise window if minimized or in SysTray
         if self.global_frame.isHidden():
             self.global_frame.show()
-        if self.global_frame.windowState() & Qt.WindowMinimized:
-            self.global_frame.setWindowState(Qt.WindowActive)
+        if self.global_frame.windowState() & Qt.WindowState.WindowMinimized:
+            self.global_frame.setWindowState(Qt.WindowState.WindowActive)
         if self.global_frame.isVisible():
             self.global_frame.window().activateWindow()
 
         # Center the notification frame regarding its parent
-        self.move(self.global_frame.frameGeometry().topLeft() +
-                  self.global_frame.rect().center() - self.rect().center())
+        self.move(
+            self.global_frame.frameGeometry().topLeft()
+            + self.global_frame.rect().center()
+            - self.rect().center()
+        )
         self.fade_in()
         return super(NotificationFrame, self).showEvent(event)
 
@@ -840,7 +855,6 @@ class NotificationFrame(RegistryProperties, OpacityAnimation, QtWidgets.QDialog)
 
 
 class WelcomeNotification(NotificationFrame):
-
     def __init__(self, parent=None):
         super(WelcomeNotification, self).__init__(parent)
 

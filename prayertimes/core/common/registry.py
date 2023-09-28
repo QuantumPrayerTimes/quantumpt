@@ -30,7 +30,8 @@ class Registry(object):
     This is the Component Registry. It is a singleton object and is used to
     provide a look up service for common objects.
     """
-    log.info('Registry loaded')
+
+    log.info("Registry loaded")
     __instance__ = None
 
     def __new__(cls):
@@ -46,13 +47,13 @@ class Registry(object):
         """
         The constructor for the component registry providing a single registry of objects.
         """
-        log.debug('Registry Initialising')
+        log.debug("Registry Initialising")
         # registry = cls()
         cls.service_list = {}
         cls.functions_list = {}
         cls.signals_list = {}
         # Allow the tests to remove Registry entries but not the live system
-        cls.running_under_test = 'nose' in sys.argv[0]
+        cls.running_under_test = "nose" in sys.argv[0]
         cls.initialising = True
         return cls
 
@@ -67,8 +68,8 @@ class Registry(object):
         else:
             if not self.initialising:
                 trace_error_handler(log)
-                log.error('Service %s not found in list' % key)
-                raise KeyError('Service %s not found in list' % key)
+                log.error("Service %s not found in list" % key)
+                raise KeyError("Service %s not found in list" % key)
 
     def register(self, key, reference):
         """
@@ -79,8 +80,8 @@ class Registry(object):
         """
         if key in self.service_list:
             trace_error_handler(log)
-            log.error('Duplicate service exception %s' % key)
-            raise KeyError('Duplicate service exception %s' % key)
+            log.error("Duplicate service exception %s" % key)
+            raise KeyError("Duplicate service exception %s" % key)
         else:
             self.service_list[key] = reference
 
@@ -133,7 +134,7 @@ class Registry(object):
                         results.append(result)
                 except TypeError:
                     trace_error_handler(log)
-                    log.exception('Exception for function %s', _function)
+                    log.exception("Exception for function %s", _function)
         else:
             trace_error_handler(log)
             log.error("Event %s called but not registered" % event)
@@ -168,7 +169,7 @@ class Registry(object):
                         results.append(result)
                 except TypeError:
                     trace_error_handler(log)
-                    log.exception('Exception for signal %s', signal)
+                    log.exception("Exception for signal %s", signal)
         else:
             trace_error_handler(log)
             log.error("Signal %s called but not registered" % event)

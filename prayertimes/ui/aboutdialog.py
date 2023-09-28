@@ -16,8 +16,9 @@
 # more details.                                                               #
 # --------------------------------------------------------------------------- #
 
-from PyQt5 import QtWidgets
-# from PyQt5.QtGui import QPixmap
+from PyQt6 import QtWidgets
+
+# from PyQt6.QtGui import QPixmap
 
 from prayertimes.ui.abstract import Dialog
 
@@ -28,16 +29,26 @@ class AboutDialog(Dialog):
     """
 
     def __init__(self, parent=None):
-        super(AboutDialog, self).__init__(width=650, height=250, obj_name=self.__class__.__name__,
-                                          titlebar_name="About", titlebar_icon=None, parent=parent)
+        super(AboutDialog, self).__init__(
+            width=650,
+            height=250,
+            obj_name=self.__class__.__name__,
+            titlebar_name="About",
+            titlebar_icon=None,
+            parent=parent,
+        )
 
         grid_layout = QtWidgets.QGridLayout()
 
         self.name_prog = QtWidgets.QLabel("QuantumPrayerTimes", self)
 
         self.label_version = QtWidgets.QLabel("v0.0.1", self)
-        self.label_copyright = QtWidgets.QLabel("Copyright 2017 QuantumPrayerTimes", self)
-        self.label_contribution = QtWidgets.QLabel("Special thanks to all people for contribution.", self)
+        self.label_copyright = QtWidgets.QLabel(
+            "Copyright 2017 QuantumPrayerTimes", self
+        )
+        self.label_contribution = QtWidgets.QLabel(
+            "Special thanks to all people for contribution.", self
+        )
 
         grid_layout.addWidget(self.name_prog, 0, 0)
         grid_layout.addWidget(self.label_version, 1, 0)

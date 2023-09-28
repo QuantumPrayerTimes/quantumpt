@@ -19,9 +19,9 @@
 import datetime
 from collections import OrderedDict
 
-from PyQt5 import QtWidgets
-from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtGui import QPixmap
+from PyQt6 import QtWidgets
+from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtGui import QPixmap
 
 # from prayertimes.core.common import translate
 from prayertimes.core.common.logapi import log
@@ -30,13 +30,14 @@ from prayertimes.core.common.settings import Settings
 
 
 class AbstractSpinBox(QtWidgets.QSpinBox):
-
     value_changed = pyqtSignal(int)
 
     def __init__(self, parent=None):
         super(AbstractSpinBox, self).__init__(parent)
 
-        self.valueChanged[int].connect(self.on_value_changed, type=Qt.QueuedConnection)
+        self.valueChanged.connect(
+            self.on_value_changed, type=Qt.ConnectionType.QueuedConnection
+        )
 
     def on_value_changed(self):
         self.lineEdit().deselect()
@@ -47,13 +48,14 @@ class AbstractSpinBox(QtWidgets.QSpinBox):
 
 
 class PrayerTimeFrame(RegistryMixin, QtWidgets.QFrame):
-
     highlight_prayer = pyqtSignal(bool)
 
-    def __init__(self, parent=None, prayer_name="Default", prayer_time="12:00", icon=None):
+    def __init__(
+        self, parent=None, prayer_name="Default", prayer_time="12:00", icon=None
+    ):
         super(PrayerTimeFrame, self).__init__(parent)
 
-        self.setWindowFlags(Qt.FramelessWindowHint)
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
         self.setObjectName(self.__class__.__name__)
 
         self.main_layout = QtWidgets.QGridLayout()
@@ -66,15 +68,25 @@ class PrayerTimeFrame(RegistryMixin, QtWidgets.QFrame):
         self.activated_cb.setChecked(True)
 
         self.prayer_label = QtWidgets.QLabel(prayer_name)
-        self.prayer_label.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
-        self.prayer_label.setAlignment(Qt.AlignVCenter | Qt.AlignCenter)
+        self.prayer_label.setSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Fixed
+        )
+        self.prayer_label.setAlignment(
+            Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignCenter
+        )
 
         self.prayer_time = QtWidgets.QLabel(prayer_time)
-        self.prayer_time.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
-        self.prayer_time.setAlignment(Qt.AlignVCenter | Qt.AlignCenter)
+        self.prayer_time.setSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Fixed
+        )
+        self.prayer_time.setAlignment(
+            Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignCenter
+        )
 
         self.prayer_icon = QtWidgets.QLabel()
-        self.prayer_icon.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        self.prayer_icon.setSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed
+        )
         self.prayer_icon.setPixmap(QPixmap(icon))
 
         self.mute_cb = QtWidgets.QCheckBox()
@@ -159,13 +171,14 @@ class PrayerTimeFrame(RegistryMixin, QtWidgets.QFrame):
         :param current: new current prayer.
         :return:
         """
-        if self.label in ('الظهر', 'Dhuhr', 'الجمعة') \
-                and ("Friday" in datetime.datetime.now().strftime("%A")):
+        if self.label in ("الظهر", "Dhuhr", "الجمعة") and (
+            "Friday" in datetime.datetime.now().strftime("%A")
+        ):
             if current:
                 self.setProperty("current", 3)
             else:
                 self.setProperty("current", 2)
-            self.label = 'الجمعة'
+            self.label = "الجمعة"
         else:
             if current:
                 self.setProperty("current", 1)
@@ -200,19 +213,23 @@ class PrayersContainerFrame(UniqueRegistryMixin, QtWidgets.QFrame):
 
     """
 
-    prayer_list = [('Fajr', 'الفجر'),
-                   ('Shourouq', 'الشروق'),
-                   ('Dhuhr', 'الظهر'),
-                   ('Asr', 'العصر'),
-                   ('Maghrib', 'المغرب'),
-                   ('Isha', 'العشاء')]
+    prayer_list = [
+        ("Fajr", "الفجر"),
+        ("Shourouq", "الشروق"),
+        ("Dhuhr", "الظهر"),
+        ("Asr", "العصر"),
+        ("Maghrib", "المغرب"),
+        ("Isha", "العشاء"),
+    ]
 
-    icon_set = [":/icons/prayerframe_fajr.png",
-                ":/icons/prayerframe_sunrise.png",
-                ":/icons/prayerframe_dhuhr.png",
-                ":/icons/prayerframe_asr.png",
-                ":/icons/prayerframe_sunset.png",
-                ":/icons/prayerframe_isha.png"]
+    icon_set = [
+        ":/icons/prayerframe_fajr.png",
+        ":/icons/prayerframe_sunrise.png",
+        ":/icons/prayerframe_dhuhr.png",
+        ":/icons/prayerframe_asr.png",
+        ":/icons/prayerframe_sunset.png",
+        ":/icons/prayerframe_isha.png",
+    ]
 
     def __init__(self, parent=None):
         super(PrayersContainerFrame, self).__init__(parent)
@@ -228,8 +245,8 @@ class PrayersContainerFrame(UniqueRegistryMixin, QtWidgets.QFrame):
         for p_name in reversed(self.prayer_list):
             # p_name[0] : English
             # p_name[1] : Arabic
-            if Settings().contains('general_settings/arabic_names'):
-                if Settings().value('general_settings/arabic_names') == 1:
+            if Settings().contains("general_settings/arabic_names"):
+                if Settings().value("general_settings/arabic_names") == 1:
                     self.praytimes[p_name[0]] = PrayerTimeFrame(prayer_name=p_name[1])
                 else:
                     self.praytimes[p_name[0]] = PrayerTimeFrame(prayer_name=p_name[0])
@@ -238,7 +255,10 @@ class PrayersContainerFrame(UniqueRegistryMixin, QtWidgets.QFrame):
 
             # Hide not needed widgets for Shourouq without changing layout form.
             if p_name[0] == "Shourouq":
-                for widget in [self.praytimes[p_name[0]].activated_cb, self.praytimes[p_name[0]].mute_cb]:
+                for widget in [
+                    self.praytimes[p_name[0]].activated_cb,
+                    self.praytimes[p_name[0]].mute_cb,
+                ]:
                     sp_retain = widget.sizePolicy()
                     sp_retain.setRetainSizeWhenHidden(True)
                     widget.setSizePolicy(sp_retain)
@@ -258,7 +278,10 @@ class PrayersContainerFrame(UniqueRegistryMixin, QtWidgets.QFrame):
         for p_name in reversed(self.prayer_list):
             # p_name[0] : English prayer name
             # p_name[1] : Arabic prayer name
-            if "Friday" in datetime.datetime.now().strftime("%A") and p_name[0] == "Dhuhr":
+            if (
+                "Friday" in datetime.datetime.now().strftime("%A")
+                and p_name[0] == "Dhuhr"
+            ):
                 if arabic:
                     self.praytimes[p_name[0]].label = "الجمعة"
                 else:
@@ -281,8 +304,12 @@ class PrayersContainerFrame(UniqueRegistryMixin, QtWidgets.QFrame):
             elif Settings().value("general_settings/arabic_names") == 1:
                 self._update_prayer_name(arabic=True)
             else:
-                log.debug("value for arabic_names in "
-                          "settings.ini: {}".format(Settings().value("general_settings/arabic_names")))
+                log.debug(
+                    "value for arabic_names in "
+                    "settings.ini: {}".format(
+                        Settings().value("general_settings/arabic_names")
+                    )
+                )
         else:
             self._update_prayer_name(arabic=True)
             Settings().setValue("general_settings/arabic_names", 1)
@@ -347,8 +374,11 @@ class PrayersContainerFrame(UniqueRegistryMixin, QtWidgets.QFrame):
         :return:
         """
         for p_name in self.prayer_list:
-            if p_name[0] == 'Shourouq':
+            if p_name[0] == "Shourouq":
                 continue
             else:
-                self.praytimes[p_name[0]].activated_cb.setChecked(True) if activate \
-                    else self.praytimes[p_name[0]].activated_cb.setChecked(False)
+                self.praytimes[p_name[0]].activated_cb.setChecked(
+                    True
+                ) if activate else self.praytimes[p_name[0]].activated_cb.setChecked(
+                    False
+                )

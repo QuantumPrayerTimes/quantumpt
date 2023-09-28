@@ -35,10 +35,10 @@ class RegistryProperties(object):
         Windows needs to access the application in a dynamic manner.
         """
         if is_win():
-            return Registry().get('application')
+            return Registry().get("application")
         else:
-            if not hasattr(self, '_application') or not self._application:
-                self._application = Registry().get('application')
+            if not hasattr(self, "_application") or not self._application:
+                self._application = Registry().get("application")
             return self._application
 
     @property
@@ -46,8 +46,8 @@ class RegistryProperties(object):
         """
         Adds the global_frame to the class dynamically.
         """
-        if not hasattr(self, '_global_frame') or not self._global_frame:
-            self._global_frame = Registry().get('global_frame')
+        if not hasattr(self, "_global_frame") or not self._global_frame:
+            self._global_frame = Registry().get("global_frame")
         return self._global_frame
 
     @property
@@ -55,8 +55,11 @@ class RegistryProperties(object):
         """
         Adds the prayers container frame to the class dynamically.
         """
-        if not hasattr(self, '_prayers_container_frame') or not self._prayers_container_frame:
-            self._prayers_container_frame = Registry().get('prayers_container_frame')
+        if (
+            not hasattr(self, "_prayers_container_frame")
+            or not self._prayers_container_frame
+        ):
+            self._prayers_container_frame = Registry().get("prayers_container_frame")
         return self._prayers_container_frame
 
     @property
@@ -64,8 +67,8 @@ class RegistryProperties(object):
         """
         Adds the media manager to the class dynamically.
         """
-        if not hasattr(self, '_media_manager') or not self._media_manager:
-            self._media_manager = Registry().get('media_manager')
+        if not hasattr(self, "_media_manager") or not self._media_manager:
+            self._media_manager = Registry().get("media_manager")
         return self._media_manager
 
     @property
@@ -73,8 +76,8 @@ class RegistryProperties(object):
         """
         Adds the prayer manager to the class dynamically.
         """
-        if not hasattr(self, '_prayer_manager') or not self._prayer_manager:
-            self._prayer_manager = Registry().get('prayer_manager')
+        if not hasattr(self, "_prayer_manager") or not self._prayer_manager:
+            self._prayer_manager = Registry().get("prayer_manager")
         return self._prayer_manager
 
     @property
@@ -82,6 +85,6 @@ class RegistryProperties(object):
         """
         Adds the scheduler manager to the class dynamically.
         """
-        if not hasattr(self, '_scheduler_manager') or not self._scheduler_manager:
-            self._scheduler_manager = Registry().get('scheduler_manager')
+        if not hasattr(self, "_scheduler_manager") or not self._scheduler_manager:
+            self._scheduler_manager = Registry().get("scheduler_manager")
         return self._scheduler_manager

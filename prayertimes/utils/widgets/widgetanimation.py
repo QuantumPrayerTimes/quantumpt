@@ -16,8 +16,8 @@
 # more details.                                                               #
 # --------------------------------------------------------------------------- #
 
-from PyQt5 import QtWidgets
-from PyQt5.QtCore import pyqtSignal, QTimer, QPropertyAnimation, QEasingCurve
+from PyQt6 import QtWidgets
+from PyQt6.QtCore import pyqtSignal, QTimer, QPropertyAnimation, QEasingCurve
 
 
 class OpacityAnimation(object):
@@ -42,7 +42,7 @@ class OpacityAnimation(object):
         self.timer_transition.timeout.connect(self.update_opacity)
 
         # Get the caller widget to apply fade effect
-        self.widget = vars()['self']
+        self.widget = vars()["self"]
 
         self.speed = 0
         self.opacity = 0
@@ -128,29 +128,29 @@ class FadeAnimation(object):
             super(FadeAnimation, self).__init__()
 
         # Get the caller widget to apply fade effect
-        self.widget = vars()['self']
+        self.widget = vars()["self"]
         self.start_value = start_value
 
         self.opacityEffect = QtWidgets.QGraphicsOpacityEffect(self)
         self.widget.setGraphicsEffect(self.opacityEffect)
         self.opacityEffect.setOpacity(start_value)
 
-        self.fadeInAnimation = QPropertyAnimation(self.opacityEffect, b'opacity')
+        self.fadeInAnimation = QPropertyAnimation(self.opacityEffect, b"opacity")
         self.fadeInAnimation.setStartValue(start_value)
         self.fadeInAnimation.setEndValue(1.0)
         self.fadeInAnimation.finished.connect(self.on_finished_fadein_animation)
 
-        self.fadeOutAnimation = QPropertyAnimation(self.opacityEffect, b'opacity')
+        self.fadeOutAnimation = QPropertyAnimation(self.opacityEffect, b"opacity")
         self.fadeOutAnimation.setStartValue(1.0)
         self.fadeOutAnimation.setEndValue(start_value)
         self.fadeOutAnimation.finished.connect(self.on_finished_fadeout_animation)
 
     def on_finished_fadein_animation(self):
-        """ Override """
+        """Override"""
         pass
 
     def on_finished_fadeout_animation(self):
-        """ Override """
+        """Override"""
         pass
 
     def fade_in(self, duration):
@@ -187,16 +187,16 @@ class AlternatePositionAnimation(object):
             super(AlternatePositionAnimation, self).__init__()
 
         # Get the caller widget to apply fade effect
-        self.widget = vars()['self']
+        self.widget = vars()["self"]
 
-        self.show_animation = QPropertyAnimation(self.widget, b'pos')
-        self.hide_animation = QPropertyAnimation(self.widget, b'pos')
+        self.show_animation = QPropertyAnimation(self.widget, b"pos")
+        self.hide_animation = QPropertyAnimation(self.widget, b"pos")
 
         self.show_animation.setDuration(200)
-        self.show_animation.setEasingCurve(QEasingCurve.Linear)
+        self.show_animation.setEasingCurve(QEasingCurve.Type.Linear)
 
         self.hide_animation.setDuration(200)
-        self.hide_animation.setEasingCurve(QEasingCurve.Linear)
+        self.hide_animation.setEasingCurve(QEasingCurve.Type.Linear)
 
         self.show_animation.finished.connect(self.show_finished_animation)
         self.hide_animation.finished.connect(self.hide_finished_animation)

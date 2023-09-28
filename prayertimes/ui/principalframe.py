@@ -16,8 +16,8 @@
 # more details.                                                               #
 # --------------------------------------------------------------------------- #
 
-from PyQt5 import QtWidgets
-from PyQt5.QtCore import Qt
+from PyQt6 import QtWidgets
+from PyQt6.QtCore import Qt
 
 from prayertimes.core.common.registry import Registry
 from prayertimes.core.common.registrymixin import UniqueRegistryMixin
@@ -36,7 +36,7 @@ class PrincipalFrame(UniqueRegistryMixin, QtWidgets.QFrame):
 
         self.layout = QtWidgets.QHBoxLayout(self)
 
-        self.setWindowFlags(Qt.FramelessWindowHint)
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
         self.setObjectName(self.__class__.__name__)
 
         self.container_stack = QtWidgets.QStackedWidget(self)

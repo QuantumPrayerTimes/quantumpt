@@ -16,8 +16,8 @@
 # more details.                                                               #
 # --------------------------------------------------------------------------- #
 
-from PyQt5 import QtWidgets
-from PyQt5.QtGui import QPixmap, QFont
+from PyQt6 import QtWidgets
+from PyQt6.QtGui import QPixmap, QFont
 
 from prayertimes.core.common.logapi import log
 from prayertimes.core.common.resourceslocation import ResourcesLocation
@@ -26,12 +26,15 @@ from prayertimes.core.common.settings import Settings
 from prayertimes.ui.abstract import TaskThread, FrameCitySetting
 
 from prayertimes.utils.city_infos import City
-from prayertimes.utils.ip_location import connected_to_internet, get_public_ip, get_location_from_ip
+from prayertimes.utils.ip_location import (
+    connected_to_internet,
+    get_public_ip,
+    get_location_from_ip,
+)
 from prayertimes.utils.widgets.waitoverlay import WaitingOverlay
 
 
 class OnlineFrameWizard(QtWidgets.QFrame):
-
     def __init__(self, parent=None):
         super(OnlineFrameWizard, self).__init__(parent)
 
@@ -46,15 +49,20 @@ class OnlineFrameWizard(QtWidgets.QFrame):
         self.overlay = WaitingOverlay(self)
         self.overlay.hide()
 
-        self.not_connected_label = QtWidgets.QLabel("Cannot detect location using internet..  :(\n"
-                                                    "Please proceed to setup your city",
-                                                    self)
+        self.not_connected_label = QtWidgets.QLabel(
+            "Cannot detect location using internet..  :(\n"
+            "Please proceed to setup your city",
+            self,
+        )
         self.not_connected_label.setFont(QFont("capsuula", 30))
         self.not_connected_label.hide()
 
-        self.retry_connection_btn = QtWidgets.QPushButton('Retry to connect', self)
-        self.go_offline_radio = QtWidgets.QRadioButton('Not your city ? '
-                                                       'Check it to select your city manually', self)
+        self.retry_connection_btn = QtWidgets.QPushButton(
+            "Retry to connect", clicked=self.check_connection
+        )
+        self.go_offline_radio = QtWidgets.QRadioButton(
+            "Not your city ? " "Check it to select your city manually", self
+        )
         self.go_offline_radio.hide()
 
         self.frame_city = FrameCitySetting(self, with_map=True)
@@ -71,8 +79,6 @@ class OnlineFrameWizard(QtWidgets.QFrame):
         self.veriy_connection = TaskThread(_function=self._run_con)
         self.veriy_connection.finished.connect(self.on_finished)
 
-        self.retry_connection_btn.clicked.connect(self.check_connection)
-
         self.layout.addLayout(self.h_layout)
         self.setLayout(self.layout)
 
@@ -86,11 +92,13 @@ class OnlineFrameWizard(QtWidgets.QFrame):
         if connected_to_internet():
             try:
                 public_ip = get_public_ip()
-                _dict = get_location_from_ip(public_ip, ResourcesLocation().database_dir + '/ip_location.mmdb')
+                _dict = get_location_from_ip(
+                    public_ip, ResourcesLocation().database_dir + "/ip_location.mmdb"
+                )
                 if not self.verify_dict(_dict):
                     return None
             except Exception as e:
-                log.exception('Could not get location using public ip. {}'.format(e))
+                log.exception("Could not get location using public ip. {}".format(e))
 
         return _dict
 
@@ -165,19 +173,26 @@ class OnlineFrameWizard(QtWidgets.QFrame):
 
 
 class LocationOnlinePage(QtWidgets.QWizardPage):
-
     def __init__(self, parent=None):
         super(LocationOnlinePage, self).__init__(parent)
 
         self.setObjectName(self.__class__.__name__)
-        self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        self.setSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Expanding,
+            QtWidgets.QSizePolicy.Policy.Expanding,
+        )
 
         self.setTitle("Online Location Platform\n")
-        self.setSubTitle("IP Geolocation tool helps you find the "
-                         "approximate geographic location of your IP address along with some other useful "
-                         "information TimeZone, Country Code, State etc. to determine prayer times settings.\n\n"
-                         "IP address location information is provided by MaxMind database.")
-        self.setPixmap(QtWidgets.QWizard.BannerPixmap, QPixmap(":/icons/wizard_map.png"))
+        self.setSubTitle(
+            "IP Geolocation tool helps you find the "
+            "approximate geographic location of your IP address along with some other useful "
+            "information TimeZone, Country Code, State etc. to determine prayer times settings.\n\n"
+            "IP address location information is provided by MaxMind database."
+        )
+        self.setPixmap(
+            QtWidgets.QWizard.WizardPixmap.BannerPixmap,
+            QPixmap(":/icons/wizard_map.png"),
+        )
 
         self.layout = QtWidgets.QVBoxLayout(self)
         self.h_layout = QtWidgets.QHBoxLayout()
@@ -207,7 +222,9 @@ class LocationOnlinePage(QtWidgets.QWizardPage):
         return super(LocationOnlinePage, self).cleanupPage()
 
     def nextId(self):
-        if self.online_frame.located and (not self.online_frame.go_offline_radio.isChecked()):
+        if self.online_frame.located and (
+            not self.online_frame.go_offline_radio.isChecked()
+        ):
             return self.wizard().prayer_page_id
         else:
             return self.wizard().location_offline_page_id

@@ -16,9 +16,9 @@
 # more details.                                                               #
 # --------------------------------------------------------------------------- #
 
-from PyQt5 import QtWidgets
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPixmap
+from PyQt6 import QtWidgets
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QPixmap
 
 from prayertimes.core.common.settings import Settings
 from prayertimes.core.lib.prayer.prayertimes import PrayTimes
@@ -37,19 +37,23 @@ class SimplestLabel(QtWidgets.QLabel):
 
 class MethodFrame(QtWidgets.QFrame):
     method_dict = PrayTimes.methods
-    default_method = 'MWL'
+    default_method = "MWL"
 
     def __init__(self, parent=None):
         super(MethodFrame, self).__init__(parent)
 
-        self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        self.setSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Fixed
+        )
         self.setObjectName(self.__class__.__name__)
 
         self.layout = QtWidgets.QVBoxLayout()
         self.layout.setSpacing(10)
         self.method_button_layout = QtWidgets.QHBoxLayout()
 
-        self.question_label = QtWidgets.QLabel("Please select your calculation method :")
+        self.question_label = QtWidgets.QLabel(
+            "Please select your calculation method :"
+        )
 
         self.label = SimplestLabel(self)
         self.group = QtWidgets.QButtonGroup()
@@ -75,8 +79,8 @@ class MethodFrame(QtWidgets.QFrame):
         """
         # Get method name reading button text
         method = self.sender().text()
-        method_name = self.method_dict[method]['name']
-        method_region = self.method_dict[method]['region']
+        method_name = self.method_dict[method]["name"]
+        method_region = self.method_dict[method]["region"]
 
         Settings().setValue("prayer_settings/calculation", method)
         self.label.setText("{} used commonly in {}".format(method_name, method_region))
@@ -98,13 +102,17 @@ class AsrSettingsFrame(QtWidgets.QFrame):
     def __init__(self, parent=None):
         super(AsrSettingsFrame, self).__init__(parent)
 
-        self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        self.setSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Fixed
+        )
         self.setObjectName(self.__class__.__name__)
 
         self.layout = QtWidgets.QVBoxLayout()
         self.layout.setSpacing(10)
         self.h_layout = QtWidgets.QHBoxLayout()
-        self.question_label = QtWidgets.QLabel("Please select your asr setting method :")
+        self.question_label = QtWidgets.QLabel(
+            "Please select your asr setting method :"
+        )
 
         self.asr_method_label = SimplestLabel(self)
         self.group = QtWidgets.QButtonGroup()
@@ -160,16 +168,21 @@ class PrayerPage(QtWidgets.QWizardPage):
         self.setObjectName(self.__class__.__name__)
 
         self.layout = QtWidgets.QVBoxLayout()
-        self.layout.setAlignment(Qt.AlignCenter)
+        self.layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.method_frame = MethodFrame(parent=self)
         self.asr_frame = AsrSettingsFrame(parent=self)
 
         self.setTitle("Prayer Settings Platform")
-        self.setSubTitle("\nPrayer settings permits to determine which calculation method is the most appropriate to "
-                         "your location.\n\nUnder each method, you can find a quick overview which explain where the "
-                         "method is based and the most approriate location.")
-        self.setPixmap(QtWidgets.QWizard.BannerPixmap, QPixmap(":/icons/wizard_prayer.png"))
+        self.setSubTitle(
+            "\nPrayer settings permits to determine which calculation method is the most appropriate to "
+            "your location.\n\nUnder each method, you can find a quick overview which explain where the "
+            "method is based and the most approriate location."
+        )
+        self.setPixmap(
+            QtWidgets.QWizard.WizardPixmap.BannerPixmap,
+            QPixmap(":/icons/wizard_prayer.png"),
+        )
 
         self.layout.addWidget(self.method_frame)
         self.layout.addWidget(self.asr_frame)

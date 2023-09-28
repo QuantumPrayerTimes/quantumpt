@@ -16,9 +16,9 @@
 # more details.                                                               #
 # --------------------------------------------------------------------------- #
 
-from PyQt5 import QtWidgets
-from PyQt5.QtGui import QPixmap
-from PyQt5.QtCore import Qt
+from PyQt6 import QtWidgets
+from PyQt6.QtGui import QPixmap
+from PyQt6.QtCore import Qt
 
 
 class LastPage(QtWidgets.QWizardPage):
@@ -30,12 +30,18 @@ class LastPage(QtWidgets.QWizardPage):
         self.layout = QtWidgets.QVBoxLayout()
 
         self.icon = QtWidgets.QLabel(self)
-        self.icon.setPixmap(QPixmap(':/icons/wizard_set.png'))
-        self.icon.setAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+        self.icon.setPixmap(QPixmap(":/icons/wizard_set.png"))
+        self.icon.setAlignment(
+            Qt.AlignmentFlag.AlignCenter | Qt.AlignmentFlag.AlignVCenter
+        )
 
         self.title_label = QtWidgets.QLabel("You're all set !\n", self)
-        self.title_label.setStyleSheet("QLabel {color: #6F8DA6; font: 60px 'capsuula';}")
-        self.title_label.setAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+        self.title_label.setStyleSheet(
+            "QLabel {color: #6F8DA6; font: 60px 'capsuula';}"
+        )
+        self.title_label.setAlignment(
+            Qt.AlignmentFlag.AlignCenter | Qt.AlignmentFlag.AlignVCenter
+        )
 
         self.layout.addStretch()
         self.layout.addWidget(self.icon)

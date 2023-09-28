@@ -114,7 +114,9 @@ def decimal_to_dms(value, value_type):
             direction = "N"
         else:
             direction = ""
-    notation = "{}°{}'{}\"{}".format(int(degrees), int(minutes), str(seconds)[0:5], direction)
+    notation = "{}°{}'{}\"{}".format(
+        int(degrees), int(minutes), str(seconds)[0:5], direction
+    )
     return notation
 
 
@@ -126,6 +128,6 @@ def lat_lng_to_dms(latitude, longitude):
     :param longitude:
     :return:
     """
-    lat = decimal_to_dms(latitude, 'Latitude')
-    lng = decimal_to_dms(longitude, 'Longitude')
+    lat = decimal_to_dms(latitude, "Latitude")
+    lng = decimal_to_dms(longitude, "Longitude")
     return "{} | {}".format(lat, lng)

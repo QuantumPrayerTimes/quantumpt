@@ -18,9 +18,9 @@
 
 import re
 
-from PyQt5 import QtWidgets
-from PyQt5.QtGui import QColor
-from PyQt5.QtCore import pyqtSignal, QTimer
+from PyQt6 import QtWidgets
+from PyQt6.QtGui import QColor
+from PyQt6.QtCore import pyqtSignal, QTimer
 
 
 class PMXMessageOverlay(object):
@@ -42,15 +42,15 @@ class PMXMessageOverlay(object):
         self._time = 2000
 
     def message_faded_in(self):
-        """ Override """
+        """Override"""
         pass
 
     def message_clicked(self):
-        """ Override """
+        """Override"""
         pass
 
     def message_faded_out(self):
-        """ Override """
+        """Override"""
         self.active_message = False
         pass
 
@@ -124,7 +124,7 @@ class LabelOverlay(QtWidgets.QLabel):
         return super(LabelOverlay, self).setParent(parent)
 
     def update_position(self):
-        if hasattr(self.parent(), 'viewport'):
+        if hasattr(self.parent(), "viewport"):
             parent_rect = self.parent().viewport().rect()
         else:
             parent_rect = self.parent().rect()
@@ -231,17 +231,31 @@ class LabelOverlay(QtWidgets.QLabel):
                 self.fadedOut.emit()
                 self.hide()
 
-    COLOR_PATTERN = re.compile(r"(?<!-)color:\s*rgba?\([\d,\s%\w]*\);?", re.MULTILINE | re.UNICODE)
-    BACKGROUND_COLOR_PATTERN = re.compile(r"background-color:\s*rgba?\([\d,\s%\w]*\);?", re.MULTILINE | re.UNICODE)
-    BORDER_COLOR_PATTERN = re.compile(r"border-color:\s*rgba?\([\d,\s%\w]*\);?", re.MULTILINE | re.UNICODE)
+    COLOR_PATTERN = re.compile(
+        r"(?<!-)color:\s*rgba?\([\d,\s%\w]*\);?", re.MULTILINE | re.UNICODE
+    )
+    BACKGROUND_COLOR_PATTERN = re.compile(
+        r"background-color:\s*rgba?\([\d,\s%\w]*\);?", re.MULTILINE | re.UNICODE
+    )
+    BORDER_COLOR_PATTERN = re.compile(
+        r"border-color:\s*rgba?\([\d,\s%\w]*\);?", re.MULTILINE | re.UNICODE
+    )
 
     def _update_stylesheet_alpha(self):
         stylesheet = self.styleSheet()
         # re.sub(pattern, repl, string, count, flags)
 
-        for regex, name, col in ((self.COLOR_PATTERN, 'color', self.color),
-                                 (self.BACKGROUND_COLOR_PATTERN, 'background-color', self.background_color),
-                                 (self.BORDER_COLOR_PATTERN, 'border-color', self.border_color)):
-            repl = '%s: rgba(%d, %d, %d, %d%%);' % (name, col.red(), col.green(), col.blue(), self.opacity * 100.0)
+        for regex, name, col in (
+            (self.COLOR_PATTERN, "color", self.color),
+            (self.BACKGROUND_COLOR_PATTERN, "background-color", self.background_color),
+            (self.BORDER_COLOR_PATTERN, "border-color", self.border_color),
+        ):
+            repl = "%s: rgba(%d, %d, %d, %d%%);" % (
+                name,
+                col.red(),
+                col.green(),
+                col.blue(),
+                self.opacity * 100.0,
+            )
             stylesheet = regex.sub(repl, stylesheet)
         self.setStyleSheet(stylesheet)
