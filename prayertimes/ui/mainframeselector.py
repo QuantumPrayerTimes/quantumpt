@@ -156,8 +156,8 @@ class MainFrameSelector(
 
         :return:
         """
-        self.start_show()
         self.show()
+        self.start_show()
 
     def set_hide_animation(self):
         """
