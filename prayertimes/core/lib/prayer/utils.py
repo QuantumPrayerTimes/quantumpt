@@ -16,11 +16,9 @@
 # more details.                                                               #
 # --------------------------------------------------------------------------- #
 
-import re
-import time
 import datetime
 
-from prayertimes.core.common.logapi import log
+from PyQt6.QtCore import QTime
 
 
 def dt_from_string(s):
@@ -30,14 +28,8 @@ def dt_from_string(s):
     :param s: date string object to be converted to datetime object.
     :return:
     """
-    try:
-        h, m = [int(s) for s in re.findall(r"\b\d+\b", s)]
-    except ValueError:
-        log.exception(
-            "Cannot convert string format time to datetime object for {}".format(s)
-        )
-        return
-    return datetime.time(h, m)
+    qtime = QTime.fromString(s, "HH:mm")
+    return datetime.time(qtime.hour(), qtime.minute())
 
 
 def from_24_to_12(time_format_24):
@@ -47,13 +39,8 @@ def from_24_to_12(time_format_24):
     :param time_format_24: time string in 24h format.
     :return:
     """
-    formatted_time = time.strftime(
-        "%I:%M %p", time.strptime(str(time_format_24).strip(), "%H:%M")
-    )
-    # Remove first number if it is a 0
-    if formatted_time[0] == "0":
-        formatted_time = formatted_time[1:]
-    return str(formatted_time).strip()
+    qtime = QTime.fromString(time_format_24, "HH:mm")
+    return str(qtime.toString("h:mm AP")).strip()
 
 
 def from_12_to_24(time_format_12):
@@ -63,10 +50,8 @@ def from_12_to_24(time_format_12):
     :param time_format_12: time string in 12h format.
     :return:
     """
-    formatted_time = time.strftime(
-        "%H:%M", time.strptime(str(time_format_12).strip(), "%I:%M %p")
-    )
-    return str(formatted_time).strip()
+    qtime = QTime.fromString(time_format_12, "h:mm AP")
+    return str(qtime.toString("HH:mm")).strip()
 
 
 def get_hour_minute(dt):
@@ -76,5 +61,5 @@ def get_hour_minute(dt):
     :param dt: datetime object to be converted to string object.
     :return:
     """
-    dt_ = time.strftime("%H:%M", time.strptime(str(dt).strip(), "%H:%M:%S"))
-    return dt_
+    qtime = QTime.fromString(str(dt).strip(), "HH:mm:ss")
+    return str(qtime.toString("HH:mm")).strip()
