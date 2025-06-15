@@ -239,7 +239,7 @@ class RandomMediaPlayer(MediaCore):
         else:
             log.debug(
                 "\tPlaying file {}".format(
-                    self.currentMedia().canonicalUrl().toLocalFile()
+                    self.source().toLocalFile()
                 )
             )
             return super(RandomMediaPlayer, self).play()
@@ -261,7 +261,7 @@ class DuaAfterAthanPlayer(MediaCore):
         super(DuaAfterAthanPlayer, self).setup_media(self._dua_after_athan)
         log.debug(
             "begin dua after athan with media {}".format(
-                self.currentMedia().canonicalUrl().toLocalFile()
+                self.source().toLocalFile()
             )
         )
         return super(DuaAfterAthanPlayer, self).play()
@@ -322,7 +322,7 @@ class AthanMediaPlayer(RegistryProperties, MediaCore):
 
         log.debug(
             "begin athan of prayer: {} with media {}".format(
-                self.__caller__, self.currentMedia().canonicalUrl().toLocalFile()
+                self.__caller__, self.source().toLocalFile()
             )
         )
 

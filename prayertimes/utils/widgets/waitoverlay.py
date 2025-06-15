@@ -28,7 +28,6 @@ class WaitingOverlay(QtWidgets.QFrame):
         super(WaitingOverlay, self).__init__(parent, Qt.WindowType.FramelessWindowHint)
 
         self.counter = 0
-        self.timer = QTimer()
 
         palette = QPalette(self.palette())
         palette.setColor(palette.ColorRole.Window, Qt.GlobalColor.transparent)
@@ -67,7 +66,8 @@ class WaitingOverlay(QtWidgets.QFrame):
         self.counter = 0
 
     def hideEvent(self, *args, **kwargs):
-        self.killTimer(self.timer)
+        if self.timer:
+            self.killTimer(self.timer)
 
     def timerEvent(self, event):
         self.counter += 1
